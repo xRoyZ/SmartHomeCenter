@@ -255,7 +255,7 @@ export function Automations(): ReactElement {
                 Noch keine Automation angelegt. Legen Sie unten die erste Regel an.
               </EmptyState>
             ) : null}
-            {automations.map((rule) => {
+            {automations.map((rule, index) => {
               const last = latestExecution(executions[rule.id]);
               const conditionText = describeCondition(rule.condition);
               const actionText = describeAction(rule.action);
@@ -280,7 +280,13 @@ export function Automations(): ReactElement {
                       {rule.name}
                     </span>
                   </header>
-                  <article className="rule">
+                  <article
+                    className="rule"
+                    style={{
+                      borderBottom:
+                        index === automations.length - 1 ? "1px solid var(--line)" : "none",
+                    }}
+                  >
                     <div className="cols">
                       <div className="col">
                         <span className="label">Wenn</span>
