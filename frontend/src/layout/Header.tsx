@@ -1,14 +1,15 @@
 /**
  * Header slot of the application shell.
  *
- * This is the skeleton's version of the sim-bar: it renders the simulated
- * clock, the seed and the live-connection state. The UI kit ticket owns the
- * final frame region and can extend this file without touching the shell.
+ * Renders the frame's sim-bar region: the visible simulation notice, the seed
+ * the run was started with and the simulated wall clock. The running state and
+ * the live connection are carried for screen readers so the figures are never
+ * mistaken for measurements of a real house.
  */
 
 import type { ReactElement } from "react";
 
-import { formatInteger, formatSimTime, formatWeekday, formatWeekdayShort } from "../lib/format";
+import { SimClock } from "../ui";
 
 export interface HeaderProps {
   simTime: string;
@@ -27,23 +28,15 @@ export function Header({
   connected,
   seed,
 }: HeaderProps): ReactElement {
-  const time = formatSimTime(simTime);
-  const day = formatWeekdayShort(weekday);
   const connectionText = connected ? "Live-Verbindung aktiv" : "Keine Live-Verbindung";
   const runText = paused ? "Simulation pausiert" : `Simulation läuft mit ${speed}×`;
-  const clockLabel = `Simulierte Uhrzeit ${formatWeekday(weekday)} ${time}`.trim();
 
   return (
     <header className="simbar" data-od-id="sim-bar">
       <span className="tag">Simuliert</span>
-      <span className="seed">Seed {formatInteger(seed)}</span>
-      <span className="sr-only">
-        {connectionText}, {runText}
-      </span>
-      <div className="clock" aria-label={clockLabel}>
-        <span className="day">{day}</span>
-        <span>{time}</span>
-      </div>
+      <span className="seed">Seed {seed}</span>
+      <span className="sr-only">{`${connectionText}, ${runText}`}</span>
+      <SimClock simTime={simTime} weekday={weekday} />
     </header>
   );
 }

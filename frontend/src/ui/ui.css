@@ -1,0 +1,117 @@
+/* Additions of the UI kit.
+   Every class the mockup set names is styled in styles/global.css; these rules
+   only give the kit's unnamed building blocks a shape from the same tokens. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s3);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s3) var(--pad);
+}
+
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat b {
+  font-family: var(--disp);
+  font-weight: var(--w-disp);
+  font-size: var(--fs-22);
+  line-height: 1.1;
+}
+.stat small {
+  font-family: var(--disp);
+  font-weight: var(--w-disp);
+  font-size: var(--fs-12);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-text);
+}
+
+.reading { display: inline-flex; align-items: baseline; gap: var(--s1); }
+.reading .n {
+  font-family: var(--disp);
+  font-weight: var(--w-disp);
+  font-size: var(--fs-22);
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+.reading .u {
+  font-family: var(--disp);
+  font-weight: var(--w-disp);
+  font-size: var(--fs-13);
+  color: var(--muted-text);
+  letter-spacing: 0.04em;
+}
+.reading small {
+  font-family: var(--disp);
+  font-weight: var(--w-disp);
+  font-size: var(--fs-13);
+  color: var(--muted-text);
+  margin-left: 2px;
+}
+.reading-sm .n { font-size: var(--fs-17); }
+.reading-lg .n { font-size: var(--fs-56); }
+.reading-lg .u { font-size: var(--fs-17); }
+
+.fieldgroup { display: flex; flex-direction: column; gap: var(--s2); }
+.fieldgroup .field { width: 100%; max-width: 420px; }
+.fieldhint { font-size: var(--fs-13); color: var(--muted-text); }
+
+.selectfield {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s1);
+  font-size: var(--fs-13);
+  color: var(--muted-text);
+}
+.select {
+  min-height: var(--hit);
+  width: 100%;
+  padding: 0 var(--s3);
+  background: var(--surface);
+  border: 1px solid var(--ink);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-15);
+}
+.select:disabled { opacity: 0.4; }
+
+.prose { max-width: var(--measure); }
+.prose p + p { margin-top: var(--s2); }
+
+.readout { display: flex; flex-direction: column; gap: var(--s2); }
+
+.listrow-button,
+.listrow-static {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s3);
+  width: 100%;
+  min-height: var(--hit);
+  padding: var(--s2) var(--pad);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-15);
+  text-align: left;
+}
+.listrow-button:last-child,
+.listrow-static:last-child { border-bottom: 1px solid var(--line); }
+
+/* development gallery only: previews sit in the document flow */
+.gallery { gap: var(--s4); }
+.gallery-preview .simbar,
+.gallery-preview .tabs { position: static; }
+.gallery-preview .tabs {
+  height: auto;
+  padding-top: 0;
+  border-right: 0;
+}
+.gallery-preview .toast {
+  position: static;
+  transform: none;
+  opacity: 1;
+  margin: 0;
+}
+.gallery-stage { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+.gallery-stack { display: flex; flex-direction: column; gap: var(--s3); }
