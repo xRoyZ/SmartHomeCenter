@@ -278,6 +278,51 @@ describe("history screen", () => {
     houseState.sim_time = "2026-06-15T09:30:00";
   });
 
+  it("shows the value, unit and time of the reading under the pointer", async () => {
+    const view = await renderHistory();
+    await vi.waitFor(() => {
+      expect(view.querySelector("svg.chart path.ln")).not.toBeNull();
+    });
+    const svg = view.querySelector("svg.chart") as SVGSVGElement;
+    svg.getBoundingClientRect = () =>
+      ({ left: 0, top: 0, right: 400, bottom: 200, width: 400, height: 200, x: 0, y: 0 }) as DOMRect;
+
+    await act(async () => {
+      svg.dispatchEvent(
+        new PointerEvent("pointermove", { bubbles: true, clientX: 210, pointerType: "mouse" }),
+      );
+    });
+
+    const readout = view.querySelector('[data-testid="chart-readout"]') as HTMLElement;
+    expect(readout.hidden).toBe(false);
+    expect(readout.querySelector("b")?.textContent).toBe("20,8 °C");
+    expect(readout.querySelector("span")?.textContent).toBe("09:00");
+  });
+
+  it("names the weekday on the time axis of the one-day window", async () => {
+    getHistoryMock.mockResolvedValue({
+      ...SERIES,
+      window: "1d",
+      points: [
+        { t: "2026-06-15T08:30:00", value: 20.1 },
+        { t: "2026-06-15T20:30:00", value: 20.8 },
+        { t: "2026-06-16T08:29:00", value: 21.4 },
+      ],
+    });
+    const view = await renderHistory();
+    const day = view.querySelector<HTMLButtonElement>('[data-window="1d"]');
+    await act(async () => {
+      day?.click();
+    });
+
+    await vi.waitFor(() => {
+      const labels = Array.from(view.querySelectorAll(".chartwrap .axis span")).map(
+        (label) => label.textContent,
+      );
+      expect(labels).toEqual(expect.arrayContaining(["Mo 08:30", "Mo 20:30", "Di 08:29"]));
+    });
+  });
+
   it("shows the German empty state for a series without readings", async () => {
     getHistoryMock.mockResolvedValue({ ...SERIES, points: [] });
 

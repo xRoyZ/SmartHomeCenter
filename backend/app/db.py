@@ -10,7 +10,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -31,11 +31,30 @@ def _build_engine() -> Engine:
             poolclass=StaticPool,
             future=True,
         )
-    return create_engine(
+    engine = create_engine(
         f"sqlite:///{settings.db_path}",
         connect_args={"check_same_thread": False},
         future=True,
     )
+    event.listen(engine, "connect", _tune_sqlite)
+    return engine
+
+
+def _tune_sqlite(dbapi_connection, _record) -> None:
+    """Use write-ahead logging so the per-minute commits stay cheap.
+
+    The engine commits every simulated minute; with the default rollback
+    journal each commit waits for a full sync of the file, which caps the
+    clock well below 60x and 300x. WAL with ``synchronous=NORMAL`` keeps the
+    file consistent across crashes and lets readers run beside the writer.
+    """
+
+    cursor = dbapi_connection.cursor()
+    try:
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+    finally:
+        cursor.close()
 
 
 def get_engine() -> Engine:

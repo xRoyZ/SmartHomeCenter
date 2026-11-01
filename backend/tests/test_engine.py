@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from collections.abc import Callable
 from datetime import datetime
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.models import Base
+from app.models import Base, Reading
 from app.schemas import SettingsUpdate
 from app.simulation.engine import SimulationEngine
 
@@ -119,6 +120,62 @@ def test_tick_still_advances_one_minute_at_high_speed() -> None:
 
     after = datetime.fromisoformat(engine.state.sim_time)
     assert (after - before).total_seconds() == 60
+
+
+def test_advance_steps_every_minute_and_publishes_once() -> None:
+    engine, published = _build()
+    single, _ = _build()
+
+    asyncio.run(engine.advance(5))
+    _run(single, 5)
+
+    assert engine.state.tick == 5
+    assert engine.state.sim_time == "2026-06-15T08:05:00"
+    assert len(published) == 1
+    assert engine.state.model_dump() == single.state.model_dump()
+    with engine._db_factory() as session:
+        times = session.scalars(
+            select(Reading.sim_time).where(
+                Reading.room_id == "living_room", Reading.metric == "temperature"
+            )
+        ).all()
+    assert len(times) == 5
+
+
+def test_the_clock_keeps_its_speed_when_ticks_take_time() -> None:
+    # A tick that costs 10 ms used to stretch every 3.3 ms interval at 300x,
+    # so the clock ran at about a quarter of its speed. The deadline clock
+    # batches the minutes that are due instead.
+    engine, _ = _build()
+    engine.state.speed = 300
+    minutes: list[int] = []
+
+    async def slow_advance(count: int) -> None:
+        minutes.append(count)
+        await asyncio.sleep(0.010)
+
+    engine.advance = slow_advance  # type: ignore[method-assign]
+
+    async def runner() -> None:
+        task = asyncio.create_task(engine._run_forever())
+        await asyncio.sleep(1.0)
+        task.cancel()
+        with contextlib.suppress(asyncio.CancelledError):
+            await task
+
+    asyncio.run(runner())
+
+    expected = 1.0 / engine.tick_interval
+    assert sum(minutes) >= 0.8 * expected
+
+
+def test_the_first_tick_keeps_the_daylight_of_the_initial_house() -> None:
+    engine, _ = _build()
+    before = (engine.state.outdoor.sunrise, engine.state.outdoor.sunset)
+
+    _run(engine, 1)
+
+    assert (engine.state.outdoor.sunrise, engine.state.outdoor.sunset) == before
 
 
 def test_equal_seed_produces_an_equal_sequence() -> None:

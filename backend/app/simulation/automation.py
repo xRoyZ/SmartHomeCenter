@@ -244,17 +244,16 @@ def _apply_heating_off(room: RoomState, device: DeviceState, action: ActionInput
 
 def _apply_heating_set(room: RoomState, device: DeviceState, action: ActionInput) -> str | None:
     value = float(action.value if action.value is not None else MIN_TARGET_TEMP)
-    desired_on = value > room.sensors.temperature
-    if (
-        device.target_temp is not None
-        and abs(device.target_temp - value) < 1e-9
-        and device.is_on == desired_on
-    ):
+    if device.target_temp is not None and abs(device.target_temp - value) < 1e-9 and device.is_on:
         return None
+    # The setpoint switches the thermostat on; the physics step decides from
+    # the room temperature whether it heats.
+    heats = value > room.sensors.temperature
     device.target_temp = value
-    device.is_on = desired_on
-    device.power_w = 700.0 if desired_on else 0.0
-    device.state_text = "Heizung heizt" if desired_on else "Heizung aus"
+    device.is_on = True
+    device.power_w = 700.0 if heats else 0.0
+    device.level = 100 if heats else 0
+    device.state_text = "Heizung heizt" if heats else "Heizung aus"
     return f"Heizung in {room.name} auf {value:.1f} °C gestellt"
 
 

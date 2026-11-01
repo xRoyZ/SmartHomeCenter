@@ -220,6 +220,20 @@ describe("house overview rooms", () => {
   });
 });
 
+describe("house overview energy balance", () => {
+  it("names the feed-in when the solar yield exceeds the consumption", () => {
+    const state = makeState([]);
+    state.totals = { power_w: 90, solar_w: 2780, grid_w: -2690 };
+    mockLive.state = state;
+
+    const view = renderOverview();
+    const energy = view.querySelector(".energy");
+
+    expect(energy?.querySelector(".label")?.textContent).toBe("Einspeisung");
+    expect(energy?.querySelector("[data-net]")?.textContent).toBe("2,69");
+  });
+});
+
 describe("house overview simulation controls", () => {
   it("sends the chosen speed to the settings endpoint", async () => {
     mockLive.state = makeState([]);

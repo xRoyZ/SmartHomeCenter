@@ -8,11 +8,21 @@ carries no settings argument, the mode is handed over once via
 ``occupancy_mode`` attribute to the state object). The module default is
 ``everyday`` so a standalone call is always safe.
 
+The schedule only acts when it changes its mind: a light or appliance is
+switched when the desired state of the schedule differs from the one of the
+previous step (or on the first step of a house); a room's light is also set
+again when its occupancy or daylight changes, so a light left on is switched
+off at sunrise. In between, a device someone switched by hand keeps the state
+it was given, so a manual command is not undone on the next tick. An occupant who enters a room closes a window that
+was left open there.
+
 Only the engine's seeded ``rng`` is accepted as a randomness source.
 """
 
 from __future__ import annotations
 
+import weakref
+from dataclasses import dataclass
 from datetime import datetime
 from random import Random
 
@@ -31,6 +41,32 @@ _APPLIANCE_RATINGS_W = {
     "bedroom_bedside": 30.0,
     "bathroom_washer": 1200.0,
 }
+
+
+@dataclass(frozen=True)
+class _Schedule:
+    """The desired occupant state of one step: who is where, what should run."""
+
+    active: frozenset[str]
+    lights: dict[str, tuple[bool, bool]]
+    appliances: dict[str, bool]
+
+
+_LAST_SCHEDULE: dict[int, tuple[weakref.ReferenceType[HouseState], _Schedule]] = {}
+
+
+def _swap_schedule(state: HouseState, schedule: _Schedule) -> _Schedule | None:
+    """Store ``schedule`` for ``state`` and return the one of its previous step."""
+
+    key = id(state)
+    entry = _LAST_SCHEDULE.get(key)
+    previous = entry[1] if entry is not None and entry[0]() is state else None
+
+    def _forget(reference: weakref.ReferenceType[HouseState]) -> None:
+        _LAST_SCHEDULE.pop(key, None)
+
+    _LAST_SCHEDULE[key] = (weakref.ref(state, _forget), schedule)
+    return previous
 
 
 def set_occupancy_mode(mode: OccupancyMode) -> None:
@@ -185,14 +221,40 @@ def step_behavior(state: HouseState, rng: Random, dt_min: int) -> None:
     hour = _hour_of_day(state.sim_time)
     weekend = state.weekday in _WEEKEND
     active = _active_rooms(mode, hour, weekend)
-    targets = _appliance_targets(mode, hour, weekend)
     need_light = not state.outdoor.is_day
+    schedule = _Schedule(
+        active=frozenset(active),
+        lights={room.id: (room.id in active, need_light) for room in state.rooms},
+        appliances=_appliance_targets(mode, hour, weekend),
+    )
+    previous = _swap_schedule(state, schedule)
 
     for room in state.rooms:
-        room.sensors.motion = room.id in active
-        _set_light(room, room.id in active and need_light)
-        for device_id, is_on in targets.items():
-            if device_id.startswith(f"{room.id}_"):
-                _set_appliance(room, device_id[len(room.id) + 1 :], is_on)
-        room.sensors.power_w = round(sum(device.power_w for device in room.devices), 1)
-        room.light_on = any(device.type == "light" and device.is_on for device in room.devices)
+        _step_room(room, schedule, previous)
+
+
+def _step_room(room: RoomState, schedule: _Schedule, previous: _Schedule | None) -> None:
+    """Apply the schedule to one room, touching only what changed since ``previous``.
+
+    A setting the schedule did not change stays as the resident left it.
+    """
+
+    room.sensors.motion = room.id in schedule.active
+    entered = previous is not None and room.id in schedule.active and room.id not in previous.active
+    if entered:
+        room.sensors.window_open = False
+    occupied, dark = schedule.lights[room.id]
+    if previous is None or previous.lights.get(room.id) != (occupied, dark):
+        _set_light(room, occupied and dark)
+    _step_appliances(room, schedule, previous)
+    room.sensors.power_w = round(sum(device.power_w for device in room.devices), 1)
+    room.light_on = any(device.type == "light" and device.is_on for device in room.devices)
+
+
+def _step_appliances(room: RoomState, schedule: _Schedule, previous: _Schedule | None) -> None:
+    prefix = f"{room.id}_"
+    for device_id, is_on in schedule.appliances.items():
+        if not device_id.startswith(prefix):
+            continue
+        if previous is None or previous.appliances.get(device_id) != is_on:
+            _set_appliance(room, device_id[len(prefix) :], is_on)

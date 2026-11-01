@@ -138,3 +138,74 @@ def test_state_attribute_overrides_the_module_mode() -> None:
     behavior.step_behavior(state, Random(1), 1)
 
     assert all(not room.sensors.motion for room in state.rooms)
+
+
+def test_a_manually_switched_device_keeps_its_state_between_schedule_changes() -> None:
+    state = _at(build_house(42), "2026-06-15T10:00:00", True)
+    behavior.step_behavior(state, Random(1), 1)
+    living_room = _room(state, "living_room")
+    light = _device(living_room, "living_room_light")
+    tv = _device(living_room, "living_room_tv")
+    light.is_on, light.level = True, 60
+    tv.is_on = True
+
+    state.sim_time = "2026-06-15T10:01:00"
+    behavior.step_behavior(state, Random(1), 1)
+
+    assert light.is_on and light.level == 60
+    assert tv.is_on
+
+
+def test_the_schedule_still_switches_when_its_plan_changes() -> None:
+    state = _at(build_house(42), "2026-06-15T17:59:00", True)
+    behavior.step_behavior(state, Random(1), 1)
+    tv = _device(_room(state, "living_room"), "living_room_tv")
+    assert not tv.is_on
+
+    state.sim_time = "2026-06-15T18:00:00"
+    behavior.step_behavior(state, Random(1), 1)
+
+    assert tv.is_on
+
+
+def test_a_changed_occupancy_mode_applies_on_the_next_step() -> None:
+    state = _at(build_house(42), "2026-06-15T19:00:00", False)
+    behavior.step_behavior(state, Random(1), 1)
+    assert _device(_room(state, "living_room"), "living_room_tv").is_on
+
+    behavior.set_occupancy_mode("away")
+    state.sim_time = "2026-06-15T19:01:00"
+    behavior.step_behavior(state, Random(1), 1)
+
+    assert not _device(_room(state, "living_room"), "living_room_tv").is_on
+    assert not _device(_room(state, "living_room"), "living_room_light").is_on
+
+
+def test_an_occupant_entering_the_room_closes_a_forgotten_window() -> None:
+    state = _at(build_house(42), "2026-06-15T15:58:00", True)
+    behavior.step_behavior(state, Random(1), 1)
+    living_room = _room(state, "living_room")
+    living_room.sensors.window_open = True
+
+    state.sim_time = "2026-06-15T15:59:00"
+    behavior.step_behavior(state, Random(1), 1)
+    assert living_room.sensors.window_open, "nobody is home yet"
+
+    state.sim_time = "2026-06-15T16:00:00"
+    behavior.step_behavior(state, Random(1), 1)
+    assert not living_room.sensors.window_open
+
+
+def test_a_light_left_on_in_an_empty_room_goes_off_at_sunrise() -> None:
+    state = _at(build_house(42), "2026-06-16T05:28:00", False)
+    behavior.step_behavior(state, Random(1), 1)
+    hallway_light = _device(_room(state, "hallway"), "hallway_light")
+    hallway_light.is_on, hallway_light.level, hallway_light.power_w = True, 100, 40.0
+
+    _at(state, "2026-06-16T05:29:00", False)
+    behavior.step_behavior(state, Random(1), 1)
+    assert hallway_light.is_on, "still dark: the light stays as it was left"
+
+    _at(state, "2026-06-16T05:30:00", True)
+    behavior.step_behavior(state, Random(1), 1)
+    assert not hallway_light.is_on

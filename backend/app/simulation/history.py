@@ -120,22 +120,8 @@ def _format_value(value: float) -> str:
     return text
 
 
-def record(session: Session, state: HouseState) -> None:
-    """Store one reading per room and metric for the current simulated minute."""
-
-    sim_time = state.sim_time
-    moment = _parse(sim_time)
-    minute_start = moment.replace(second=0, microsecond=0)
-    minute_end = minute_start + timedelta(minutes=1)
-    stored = {
-        (room_id, metric)
-        for room_id, metric in session.execute(
-            select(Reading.room_id, Reading.metric).where(
-                Reading.sim_time >= minute_start.isoformat(timespec="seconds"),
-                Reading.sim_time < minute_end.isoformat(timespec="seconds"),
-            )
-        ).all()
-    }
+def readings(state: HouseState) -> list[Reading]:
+    """Return the reading rows of the current simulated minute, one per room and metric."""
 
     rows: list[Reading] = []
     for room in state.rooms:
@@ -146,22 +132,55 @@ def record(session: Session, state: HouseState) -> None:
             "power": room.sensors.power_w,
         }
         for metric, value in values.items():
-            if (room.id, metric) in stored:
-                continue
             rows.append(
                 Reading(
                     room_id=room.id,
                     metric=metric,
                     value=float(value),
-                    sim_time=sim_time,
+                    sim_time=state.sim_time,
                 )
             )
+    return rows
 
-    if rows:
-        session.add_all(rows)
 
-    cutoff = (moment - RETENTION).isoformat(timespec="seconds")
+def store(session: Session, rows: list[Reading]) -> None:
+    """Add reading rows that are not stored yet and prune expired ones (no commit).
+
+    A row whose room, metric and simulated minute is already stored is skipped,
+    so a minute that is recorded twice keeps one point.
+    """
+
+    if not rows:
+        return
+    minutes = [_parse(row.sim_time).replace(second=0, microsecond=0) for row in rows]
+    first, last = min(minutes), max(minutes) + timedelta(minutes=1)
+    stored = {
+        (room_id, metric, _parse(sim_time).replace(second=0, microsecond=0))
+        for room_id, metric, sim_time in session.execute(
+            select(Reading.room_id, Reading.metric, Reading.sim_time).where(
+                Reading.sim_time >= first.isoformat(timespec="seconds"),
+                Reading.sim_time < last.isoformat(timespec="seconds"),
+            )
+        ).all()
+    }
+    fresh: list[Reading] = []
+    for row, minute in zip(rows, minutes, strict=True):
+        key = (row.room_id, row.metric, minute)
+        if key in stored:
+            continue
+        stored.add(key)
+        fresh.append(row)
+    if fresh:
+        session.add_all(fresh)
+
+    cutoff = (max(minutes) - RETENTION).isoformat(timespec="seconds")
     session.execute(delete(Reading).where(Reading.sim_time < cutoff))
+
+
+def record(session: Session, state: HouseState) -> None:
+    """Store one reading per room and metric for the current simulated minute."""
+
+    store(session, readings(state))
     session.commit()
 
 

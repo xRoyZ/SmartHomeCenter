@@ -179,9 +179,32 @@ def test_heating_target_temperature_applies_and_updates_room_state(
     response = client.put("/api/devices/living_room_heating/state", json={"target_temp": 10.0})
     body = response.json()
     assert body["device"]["target_temp"] == pytest.approx(10.0)
-    assert body["device"]["is_on"] is False
+    assert body["device"]["is_on"] is True
+    assert body["device"]["power_w"] == 0.0
     room, device = _device(app, "living_room_heating")
     assert room.heating_active is False
+
+
+def test_a_setpoint_below_the_room_temperature_heats_once_the_room_cools(
+    client: TestClient, app, series_calls
+) -> None:
+    from random import Random
+
+    from app.simulation.physics import step_physics
+
+    response = client.put("/api/devices/living_room_heating/state", json={"target_temp": 18.0})
+    assert response.status_code == 200
+
+    engine = app.state.engine
+    room, device = _device(app, "living_room_heating")
+    room.sensors.temperature = 15.0
+    room.sensors.window_open = False
+    step_physics(engine.state, Random(1), 1)
+
+    room, device = _device(app, "living_room_heating")
+    assert device.is_on is True
+    assert device.power_w > 0.0
+    assert room.heating_active is True
 
 
 def test_heating_target_outside_range_is_rejected_without_side_effect(

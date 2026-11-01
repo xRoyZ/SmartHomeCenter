@@ -13,9 +13,9 @@ import { cn } from "../../lib/cn";
 import {
   formatCo2,
   formatHumidity,
-  formatNumber,
   formatPowerWatts,
   formatTemperature,
+  formatTemperatureValue,
 } from "../../lib/format";
 import type { RoomState } from "../../lib/types";
 
@@ -133,7 +133,7 @@ export function RoomCard({ room, featured = false, sparkValues = [] }: RoomCardP
     >
       <span className="name">{room.name}</span>
       <span className="temp">
-        <span>{formatNumber(sensors.temperature, 1)}</span>
+        <span>{formatTemperatureValue(sensors.temperature)}</span>
         <small>°C</small>
         <span className="watt">{formatPowerWatts(sensors.power_w)}</span>
       </span>

@@ -16,6 +16,7 @@ import {
   formatNumber,
   formatSimTime,
   formatTemperature,
+  formatTemperatureValue,
 } from "../lib/format";
 import { useLiveState } from "../lib/liveState";
 import type {
@@ -270,7 +271,7 @@ export function RoomDetail(): ReactElement {
           <>
             <span className="nm">{room.name}</span>
             <span className="bigfig">
-              <span className="n">{formatNumber(room.sensors.temperature, 1)}</span>
+              <span className="n">{formatTemperatureValue(room.sensors.temperature)}</span>
               <span className="u">°C</span>
             </span>
           </>
@@ -307,6 +308,8 @@ export function RoomDetail(): ReactElement {
           ) : (
             <ChartFrame
               points={points}
+              times={series?.points.map((point) => point.t)}
+              formatValue={formatTemperature}
               ariaLabel={`Temperaturverlauf im ${room.name}: ${formatNumber(
                 room.sensors.temperature,
                 1,

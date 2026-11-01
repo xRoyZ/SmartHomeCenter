@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from random import Random
 
+import pytest
+
 from app.schemas import DeviceState, HouseState, RoomState
 from app.simulation.house import build_house
 from app.simulation.physics import step_physics
@@ -105,6 +107,66 @@ def test_heating_stops_at_its_target() -> None:
     assert room.heating_active is False
 
 
+def test_holding_the_target_draws_only_what_the_losses_need() -> None:
+    state = build_house(5)
+    state.outdoor.temperature = 0.0
+    state.outdoor.is_day = False
+    state.outdoor.solar_w = 0.0
+
+    room = _room(state, "bedroom")
+    room.sensors.temperature = 21.0
+    heating = _device(room, "bedroom_heating")
+    heating.is_on = True
+    heating.target_temp = 21.0
+
+    _run(state, 30)
+
+    room = _room(state, "bedroom")
+    heating = _device(room, "bedroom_heating")
+    assert room.sensors.temperature == pytest.approx(21.0, abs=0.05)
+    assert 0.0 < heating.power_w < 700.0 / 2
+    assert heating.level == round(heating.power_w / 700.0 * 100)
+
+
+def test_a_heater_below_its_rate_reports_full_power_and_load() -> None:
+    state = build_house(5)
+    state.outdoor.temperature = 0.0
+    room = _room(state, "bedroom")
+    room.sensors.temperature = 15.0
+    heating = _device(room, "bedroom_heating")
+    heating.is_on = True
+    heating.target_temp = 21.0
+
+    _run(state, 1)
+
+    heating = _device(_room(state, "bedroom"), "bedroom_heating")
+    assert heating.power_w == 700.0
+    assert heating.level == 100
+
+
+def test_an_unheated_room_keeps_drifting_close_to_the_outdoor_temperature() -> None:
+    state = build_house(5)
+    state.outdoor.temperature = 19.0
+    state.outdoor.is_day = False
+    state.outdoor.solar_w = 0.0
+    room = _room(state, "bedroom")
+    room.sensors.temperature = 20.0
+    room.sensors.humidity = 50.0
+    room.sensors.motion = False
+    for device in room.devices:
+        device.is_on = False
+        device.power_w = 0.0
+
+    _run(state, 120)
+
+    room = _room(state, "bedroom")
+    # exp(-0.003 * 120) of the 1 K gap is left: about 19.70 °C.
+    assert room.sensors.temperature == pytest.approx(19.70, abs=0.02)
+    # exp(-0.02 * 120) of the 2 % gap to the 48 % baseline is left (about 48.2 %);
+    # with one decimal the relaxation used to stop at 50.5 %.
+    assert 48.1 < room.sensors.humidity < 48.3
+
+
 def test_solar_yield_by_day_lowers_grid_draw() -> None:
     state = build_house(42)
     state.sim_time = "2026-06-15T12:00:00"
@@ -182,3 +244,18 @@ def test_cooking_and_showering_raise_humidity_and_co2() -> None:
     assert kitchen.sensors.humidity > start_kitchen_humidity
     assert kitchen.sensors.co2 > start_kitchen_co2
     assert bathroom.sensors.humidity > start_bathroom_humidity
+
+
+def test_a_power_spike_ends_after_one_simulated_minute() -> None:
+    from app.simulation import events
+
+    state = build_house(42)
+    events.apply(state, "power_spike", "kitchen", Random(1))
+    spiked = next(d for d in _room(state, "kitchen").devices if d.power_w > 1500.0)
+    assert spiked.id == "kitchen_fridge"
+
+    step_physics(state, Random(1), 1)
+
+    fridge = _device(_room(state, "kitchen"), "kitchen_fridge")
+    assert fridge.power_w == 90.0
+    assert "Stromspitze" not in fridge.state_text

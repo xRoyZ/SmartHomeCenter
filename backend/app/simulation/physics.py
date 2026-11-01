@@ -121,7 +121,14 @@ def _heating_device(room: RoomState) -> DeviceState | None:
 
 
 def _step_heating(room: RoomState, dt_min: int) -> None:
-    """Move a running heater towards its target and report its power output."""
+    """Move a running heater towards its target and report its power output.
+
+    The heater modulates: it delivers only the heat the room needs to reach
+    the target in this step, up to its full rate, and its electrical power and
+    load (``level`` in percent) follow that share of the full output. Holding
+    a room at its target therefore draws what the losses demand, not the
+    heater's full power.
+    """
 
     heating = _heating_device(room)
     if heating is None:
@@ -129,15 +136,19 @@ def _step_heating(room: RoomState, dt_min: int) -> None:
         return
 
     target = heating.target_temp
-    if heating.is_on and target is not None and room.sensors.temperature < target:
-        added = min(target - room.sensors.temperature, HEATING_RATE_PER_MIN * max(dt_min, 0))
+    full_step = HEATING_RATE_PER_MIN * max(dt_min, 0)
+    if heating.is_on and target is not None and room.sensors.temperature < target and full_step:
+        added = min(target - room.sensors.temperature, full_step)
         room.sensors.temperature += added
-        heating.power_w = HEATING_POWER_W
+        share = added / full_step
+        heating.power_w = round(HEATING_POWER_W * share, 1)
+        heating.level = max(1, round(share * 100))
         heating.state_text = "Heizung heizt"
         room.heating_active = True
         return
 
     heating.power_w = 0.0
+    heating.level = 0
     heating.state_text = "Heizung aus"
     room.heating_active = False
 
@@ -180,7 +191,7 @@ def _step_air(room: RoomState, dt_min: int) -> None:
     if sensors.motion:
         sensors.co2 += OCCUPANT_CO2_PER_MIN * dt_min
 
-    sensors.humidity = round(max(20.0, min(95.0, sensors.humidity)), 1)
+    sensors.humidity = round(max(20.0, min(95.0, sensors.humidity)), 2)
     sensors.co2 = round(max(350.0, min(3000.0, sensors.co2)), 1)
 
 
@@ -201,8 +212,9 @@ def _step_device_power(device: DeviceState) -> None:
         return
 
     if device.is_on:
-        if device.power_w <= 0.0:
-            device.power_w = _rated_power(device)
+        # A running plug or appliance draws its rated power; an extra load put
+        # on top of it (the power-spike event) lasts one simulated minute.
+        device.power_w = _rated_power(device)
         device.state_text = f"{device.name} an" if device.type == "appliance" else "Steckdose an"
     else:
         device.power_w = 0.0
@@ -252,7 +264,9 @@ def _step_room(room: RoomState, house: HouseState, solar_w: float, dt_min: int) 
 
     internal_power = sum(device.power_w for device in room.devices if device.type != "heating")
     sensors.temperature += internal_power * DEVICE_HEAT_PER_W_MIN * dt_min
-    sensors.temperature = round(max(-20.0, min(45.0, sensors.temperature)), 2)
+    # Three decimals: a step of the slow wall coupling (0.003 per minute) stays
+    # visible close to the outdoor temperature instead of rounding to zero.
+    sensors.temperature = round(max(-20.0, min(45.0, sensors.temperature)), 3)
 
     _step_air(room, dt_min)
 

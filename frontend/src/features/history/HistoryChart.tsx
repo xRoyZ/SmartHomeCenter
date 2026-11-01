@@ -12,6 +12,7 @@ import {
   formatCo2,
   formatHumidity,
   formatPower,
+  formatSimDayTime,
   formatSimTime,
   formatTemperature,
 } from "../../lib/format";
@@ -54,16 +55,19 @@ function metricValue(metric: HistoryMetric, value: number): string {
   }
 }
 
-function axisTimes(series: HistorySeries | null): string[] {
+function axisTimes(
+  series: HistorySeries | null,
+  format: (time: string) => string,
+): string[] {
   const points = series?.points ?? [];
   if (points.length < 2) {
     return [];
   }
   const lastIndex = points.length - 1;
   return [
-    formatSimTime(points[0].t),
-    formatSimTime(points[Math.floor(lastIndex / 2)].t),
-    formatSimTime(points[lastIndex].t),
+    format(points[0].t),
+    format(points[Math.floor(lastIndex / 2)].t),
+    format(points[lastIndex].t),
   ];
 }
 
@@ -83,6 +87,8 @@ export function HistoryChart({
   const highest = hasValues ? Math.max(...values) : 0;
   const lowest = hasValues ? Math.min(...values) : 0;
   const room = roomName || "Raum";
+  // The one-day window spans midnight: its times name the weekday as well.
+  const formatTime = window === "1d" ? formatSimDayTime : formatSimTime;
 
   return (
     <Group className="chartwrap" ariaLabel="Laufende Messreihe">
@@ -106,8 +112,11 @@ export function HistoryChart({
       <ChartFrame
         tall
         points={values}
+        times={points.map((point) => point.t)}
+        formatValue={(value) => metricValue(metric, value)}
+        formatTime={formatTime}
         ariaLabel={`${METRIC_LABELS[metric]}verlauf ${room}, ${WINDOW_LABELS[window]}`}
-        axisLabels={axisTimes(series)}
+        axisLabels={axisTimes(series, formatTime)}
         emptyText={
           loading && !error
             ? "Die Messreihe wird geladen …"

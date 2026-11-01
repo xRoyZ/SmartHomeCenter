@@ -10,6 +10,7 @@ import type {
   HouseState,
 } from "../../lib/types";
 import { DeviceDetail } from "../../pages/DeviceDetail";
+import { deviceStateWord } from "./DeviceControl";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
@@ -248,5 +249,13 @@ describe("device detail screen", () => {
     expect(view.textContent).toContain("Gerät nicht gefunden");
     expect(view.textContent).toContain("Das Gerät wurde nicht gefunden.");
     expect(view.querySelector('a[href="/"]')).not.toBeNull();
+  });
+});
+
+describe("heating state word", () => {
+  it("says HEIZT only while the thermostat draws power", () => {
+    expect(deviceStateWord(heatingDevice)).toBe("HEIZT");
+    expect(deviceStateWord({ ...heatingDevice, power_w: 0, level: 0 })).toBe("AUS");
+    expect(deviceStateWord({ ...heatingDevice, is_on: false, power_w: 0 })).toBe("AUS");
   });
 });

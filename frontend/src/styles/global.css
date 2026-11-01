@@ -116,7 +116,7 @@ p { text-wrap: pretty; max-width: var(--measure); }
 .room.raised { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); margin: var(--s2) var(--s2) var(--s2); padding-bottom: var(--s3); }
 .room.raised .heat { left: 0; right: 0; bottom: 0; }
 .room.raised .name { font-size: var(--fs-17); }
-.spark { grid-column: 1 / -1; display: block; height: 32px; margin: var(--s2) calc(-1 * (var(--pad) + 9px)) var(--s1) 0; width: calc(100% + var(--pad) + 9px); overflow: visible; }
+.spark { grid-column: 1 / -1; display: block; height: 32px; margin: var(--s2) 0 var(--s1); width: 100%; max-width: 100%; }
 .spark .fill { fill: var(--accent-tint); }
 .spark .ln { fill: none; stroke: var(--accent); stroke-width: 1.75; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
 
@@ -262,9 +262,10 @@ input[type="range"]:disabled { opacity: 0.4; }
 @keyframes rule-fade { from { box-shadow: inset 0 -3px 0 var(--accent); } to { box-shadow: inset 0 -3px 0 transparent; } }
 .changed { animation: rule-fade 1800ms var(--ease) 1 both; }
 
-/* ---------- charts (drawn in code, they bleed) ---------- */
-.chart { display: block; margin-inline: calc(-1 * var(--pad) - 24px); width: calc(100% + 2 * var(--pad) + 48px); max-width: none; height: 140px; overflow: visible; }
-.chart.right { margin-left: 0; width: calc(100% + var(--pad) + 24px); }
+/* ---------- charts (drawn in code) ---------- */
+/* The chart box is exactly the visible width: the wrapper clips horizontally,
+   so a box that bled past it hid the oldest and the newest readings. */
+.chart { display: block; width: 100%; max-width: none; height: 140px; overflow: visible; }
 .chart.tall { height: 260px; }
 .chart .area { fill: var(--accent-tint); }
 .chart .ln { fill: none; stroke: var(--accent); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
@@ -276,7 +277,15 @@ input[type="range"]:disabled { opacity: 0.4; }
 .legend span { display: inline-flex; align-items: center; gap: var(--s2); }
 .legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--accent); }
 .legend i.dash { border-top: 2px dashed var(--ink); }
-.chartwrap { overflow-x: clip; }
+.chartwrap { position: relative; overflow-x: clip; }
+/* chart readout: the value under the pointer, finger or keyboard focus */
+.chartwrap .chart { cursor: crosshair; touch-action: pan-y; }
+.chartwrap .chart:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.chartwrap .chart:focus:not(:focus-visible) { outline: none; }
+.charttip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 12px)); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: var(--s1) var(--s2); background: var(--ink); color: var(--surface); border-radius: var(--r-sm); white-space: nowrap; pointer-events: none; }
+.charttip b { font-family: var(--disp); font-weight: var(--w-disp); font-size: var(--fs-17); line-height: 1.1; }
+.charttip span { font-size: var(--fs-12); line-height: 1; color: var(--line); }
+.chartdot { position: absolute; z-index: 5; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); transform: translate(-50%, -50%); pointer-events: none; }
 
 /* ---------- device block (geraet) ---------- */
 .devblock { background: var(--deep); color: var(--on-deep); margin: calc(-1 * var(--s4)) calc(-1 * var(--pad)) 0; padding: var(--s4) var(--pad) 0; --flash-from: var(--accent-on-deep); }
@@ -460,7 +469,6 @@ dialog::backdrop { background: oklch(0.21 0.018 220 / 0.55); }
   .house > .side { grid-area: side; display: flex; flex-direction: column; }
   .house .rooms-head { padding-top: 0; }
   .house .jump a { padding-inline: 0; }
-  .spark { margin-right: calc(-1 * (var(--pad) + 9px)); }
   .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--s5) 64px; align-items: start; }
   .split > .wide { grid-column: 1 / -1; }
   .view { max-width: none; }
@@ -496,13 +504,6 @@ dialog::backdrop { background: oklch(0.21 0.018 220 / 0.55); }
   .note { max-width: none; justify-content: center; align-items: center; text-align: center; }
   .note svg { margin-top: 0; }
 
-  /* chart hover: value under the pointer */
-  .chartwrap { position: relative; }
-  .chartwrap .chart { cursor: crosshair; }
-  .charttip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 12px)); display: flex; flex-direction: column; align-items: center; gap: 2px; padding: var(--s1) var(--s2); background: var(--ink); color: var(--surface); border-radius: var(--r-sm); white-space: nowrap; pointer-events: none; }
-  .charttip b { font-family: var(--disp); font-weight: var(--w-disp); font-size: var(--fs-17); line-height: 1.1; }
-  .charttip span { font-size: var(--fs-12); line-height: 1; color: var(--line); }
-  .chartdot { position: absolute; z-index: 5; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); border: 2px solid var(--surface); transform: translate(-50%, -50%); pointer-events: none; }
 }
 @media (max-width: 380px) {
   :root { --pad: 12px; }

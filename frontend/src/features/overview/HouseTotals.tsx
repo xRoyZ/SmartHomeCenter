@@ -3,8 +3,10 @@
  *
  * The net grid draw is the lead figure of the start page. Solar yield and the
  * whole house's consumption sit beneath it, and the bar relates both to the
- * same reference so the two figures can be read against each other. Every
- * number comes from the live `HouseState` totals.
+ * same reference so the two figures can be read against each other. When the
+ * solar yield exceeds the consumption, the lead figure names the feed-in
+ * instead of showing a grid draw of zero. Every number comes from the live
+ * `HouseState` totals.
  */
 
 import type { ReactElement } from "react";
@@ -32,12 +34,14 @@ function kilowatts(watts: number): string {
 }
 
 export function HouseTotals({ totals, className }: HouseTotalsProps): ReactElement {
+  const feedIn = totals.grid_w < 0;
   const gridW = Math.max(0, totals.grid_w);
-  const gridKw = formatNumber(gridW / 1000, 2);
+  const gridKw = formatNumber(Math.abs(totals.grid_w) / 1000, 2);
+  const label = feedIn ? "Einspeisung" : "Netzbezug";
 
   return (
     <section className={cn("energy", className)} data-od-id="energy" aria-label="Energie des Hauses">
-      <div className="label">Netzbezug</div>
+      <div className="label">{label}</div>
       <div className="figure">
         <span className="n" data-net>
           {gridKw}
@@ -55,7 +59,7 @@ export function HouseTotals({ totals, className }: HouseTotalsProps): ReactEleme
       <div
         className="bar"
         role="img"
-        aria-label={`Netzbezug und Solar im Verhältnis zu ${formatNumber(
+        aria-label={`${label} und Solar im Verhältnis zu ${formatNumber(
           BAR_REFERENCE_W / 1000,
           1,
         )} kW`}

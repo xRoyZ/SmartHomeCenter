@@ -9,7 +9,14 @@
 
 import type { ReactElement } from "react";
 
-import { formatInteger, formatSimTime } from "../../lib/format";
+import {
+  formatCo2,
+  formatHumidity,
+  formatInteger,
+  formatPower,
+  formatSimTime,
+  formatTemperature,
+} from "../../lib/format";
 import type {
   DeviceState,
   HistoryMetric,
@@ -36,6 +43,13 @@ const METRIC_LABEL: Record<HistoryMetric, string> = {
   humidity: "Luftfeuchte",
   co2: "CO₂",
   power: "Verbrauch",
+};
+
+const METRIC_FORMAT: Record<HistoryMetric, (value: number) => string> = {
+  temperature: formatTemperature,
+  humidity: formatHumidity,
+  co2: formatCo2,
+  power: formatPower,
 };
 
 const WINDOW_LABEL: Record<string, string> = {
@@ -100,6 +114,8 @@ export function DeviceHistoryChart({
       <h2>{`Messwertverlauf · ${title}`}</h2>
       <ChartFrame
         points={points}
+        times={selected?.points.map((point) => point.t)}
+        formatValue={METRIC_FORMAT[metric]}
         ariaLabel={ariaLabel}
         axisLabels={axisLabels(selected ?? undefined)}
         legend={legend}

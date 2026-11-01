@@ -137,9 +137,14 @@ def _apply_heating(room: RoomState, device: DeviceState, command: DeviceCommand)
     if target is None:
         raise ApiError(422, "validation_error", "Es wurde keine Solltemperatur übergeben.")
     device.target_temp = round(float(target), 1)
-    device.is_on = device.target_temp > room.sensors.temperature
-    device.power_w = _HEATING_POWER if device.is_on else 0.0
-    device.state_text = "Heizung heizt" if device.is_on else "Heizung aus"
+    # A setpoint switches the thermostat on; whether it heats right now follows
+    # from the room temperature, so a room that cools below a setpoint set on
+    # a warm day is heated again later.
+    device.is_on = True
+    heats = device.target_temp > room.sensors.temperature
+    device.power_w = _HEATING_POWER if heats else 0.0
+    device.level = 100 if heats else 0
+    device.state_text = "Heizung heizt" if heats else "Heizung aus"
     return f"Soll auf {_format_decimal(device.target_temp)} °C gesetzt"
 
 

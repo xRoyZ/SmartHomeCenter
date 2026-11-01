@@ -38,7 +38,8 @@ export function formatDecimal(value: number, decimals = 1): string {
 export function deviceStateWord(device: DeviceState): string {
   switch (device.type) {
     case "heating":
-      return device.is_on ? "HEIZT" : "AUS";
+      // The thermostat stays on at its setpoint; it heats while it draws power.
+      return device.is_on && device.power_w > 0 ? "HEIZT" : "AUS";
     case "light":
       return device.is_on ? "AN" : "AUS";
     case "shutter": {

@@ -50,8 +50,21 @@ export function formatInteger(value: number): string {
   return integerFormat.format(value);
 }
 
+const tenthFormat = new Intl.NumberFormat("de-DE", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/** A temperature figure with exactly one decimal, e.g. "24,0". */
+export function formatTemperatureValue(celsius: number): string {
+  if (!Number.isFinite(celsius)) {
+    return "–";
+  }
+  return tenthFormat.format(celsius);
+}
+
 export function formatTemperature(celsius: number): string {
-  return `${formatNumber(celsius, 1)} °C`;
+  return `${formatTemperatureValue(celsius)} °C`;
 }
 
 export function formatHumidity(percent: number): string {
@@ -91,6 +104,18 @@ function clockParts(simTime: string, withSeconds: boolean): string {
 
 export function formatSimTime(simTime: string): string {
   return clockParts(simTime, false);
+}
+
+/** Weekday and clock of a simulated timestamp, e.g. "Mo 07:42". */
+export function formatSimDayTime(simTime: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(simTime);
+  if (!match) {
+    return formatSimTime(simTime);
+  }
+  // The date is read as a calendar date, never through the browser's timezone.
+  const day = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
+  const weekday = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"][day.getUTCDay()];
+  return `${weekday} ${formatSimTime(simTime)}`;
 }
 
 export function formatSimTimeDetailed(simTime: string): string {

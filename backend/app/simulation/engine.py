@@ -20,7 +20,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..config import get_settings
-from ..models import Automation, Message, Threshold
+from ..models import Automation, Message, Reading, Threshold
 from ..schemas import (
     ActionInput,
     AutomationOut,
@@ -46,6 +46,12 @@ from . import (
 )
 
 PublishCallback = Callable[[HouseState], Awaitable[None]]
+
+# At most this many simulated minutes run in one batch before the clock yields
+# to requests again; a clock further behind than the lag limit starts afresh.
+MAX_MINUTES_PER_BATCH = 60
+MAX_CLOCK_LAG_SECONDS = 2.0
+CLOCK_POLL_SECONDS = 0.05
 
 WEEKDAYS = (
     "Montag",
@@ -119,14 +125,44 @@ class SimulationEngine:
             await task
 
     async def _run_forever(self) -> None:
-        """Advance the clock once per tick interval until the task is cancelled."""
+        """Keep the simulated clock on schedule until the task is cancelled.
 
+        The clock follows a deadline rather than sleeping a fixed interval
+        after each tick: the time a tick takes, and a sleep that wakes later
+        than asked (about 15 ms on Windows), would otherwise slow 60x and 300x
+        down to a fraction of their speed. When ticks are due, all of them run
+        in one batch that publishes a single snapshot.
+        """
+
+        loop = asyncio.get_running_loop()
+        last = loop.time()
+        speed_interval = self.tick_interval
         while True:
-            await asyncio.sleep(self.tick_interval)
+            # Wake at least every CLOCK_POLL_SECONDS so a new speed or a resume
+            # takes effect at once, and always yield, even when behind, so
+            # requests are served between two batches.
+            wait = last + self.tick_interval - loop.time()
+            await asyncio.sleep(max(0.0, min(wait, CLOCK_POLL_SECONDS)))
             if self.state.paused:
+                last = loop.time()
                 continue
+            interval = self.tick_interval
+            if interval != speed_interval:
+                # A new speed counts from now: the time since the last tick at
+                # the old speed is not caught up at the new one.
+                speed_interval = interval
+                last = max(last, loop.time() - interval)
+            late = loop.time() - (last + interval)
+            if late < 0:
+                continue
+            minutes = 1 + min(int(late / interval), MAX_MINUTES_PER_BATCH - 1)
+            last += minutes * interval
+            if loop.time() - last > MAX_CLOCK_LAG_SECONDS:
+                # After a long stall (a suspended laptop, a blocked store) the
+                # clock resumes from now instead of racing to catch up.
+                last = loop.time()
             try:
-                await self.tick()
+                await self.advance(minutes)
             except Exception:
                 # A failing step must not end the clock: the next tick retries.
                 # Only a stable message is logged, never exception details.
@@ -135,16 +171,61 @@ class SimulationEngine:
     async def tick(self) -> None:
         """Advance the simulation by exactly one simulated minute."""
 
-        if self.state.paused:
+        await self.advance(1)
+
+    async def advance(self, minutes: int) -> None:
+        """Advance the simulation minute by minute and publish the final state.
+
+        Every simulated minute runs the full step and records its readings;
+        the state is persisted and published once at the end.
+        """
+
+        if self.state.paused or minutes < 1:
             return
+        automations, thresholds = self._load_rules()
+        messages: list[MessageOut] = []
+        readings: list[Reading] = []
+        # The minutes run without touching this session: the automation step
+        # writes its executions through its own session, and a write
+        # transaction held here would block it. Messages and readings of the
+        # whole batch are written afterwards in one commit.
+        for _ in range(minutes):
+            messages.extend(self._step_minute(automations, thresholds))
+            readings.extend(history.readings(self.state))
+        session = self._db_factory()
+        try:
+            for message in messages:
+                session.merge(self._message_row(message))
+            history.store(session, readings)
+            self.state.open_messages = self._count_open_messages(session)
+            persistence.save(session, self.state, self.settings)
+            session.commit()
+            self._automations = automations
+            self._thresholds = thresholds
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+        await self._publish(self.state.model_copy(deep=True))
+
+    def _step_minute(
+        self,
+        automations: list[AutomationOut],
+        thresholds: list[ThresholdOut],
+    ) -> list[MessageOut]:
+        """Run one simulated minute in memory and return the alerts it raised."""
+
         self._advance_clock()
         self._sync_settings()
         weather.step_weather(self.state, self._rng, 1)
         behavior.step_behavior(self.state, self._rng, 1)
         physics.step_physics(self.state, self._rng, 1)
         self._recalculate_totals()
-        self._apply_steps_and_store()
-        await self._publish(self.state.model_copy(deep=True))
+        # The automation module changes the state in place, logs each execution
+        # and stores its notifying messages itself.
+        automation_step.evaluate(self.state, automations, self.state.sim_time)
+        return alerts.evaluate(self.state, thresholds, self.state.sim_time)
 
     def _advance_clock(self) -> None:
         moment = datetime.fromisoformat(self.state.sim_time) + timedelta(minutes=1)
@@ -159,36 +240,13 @@ class SimulationEngine:
         self.state.totals.solar_w = solar
         self.state.totals.grid_w = round(power - solar, 1)
 
-    def _apply_steps_and_store(self) -> None:
+    def _load_rules(self) -> tuple[list[AutomationOut], list[ThresholdOut]]:
         # The rules are read in a short session that is closed again before the
         # automation step runs: that step writes through its own session, and a
         # read transaction held across it would block the write.
-        rules_session = self._db_factory()
-        try:
-            automations = self._load_automations(rules_session)
-            thresholds = self._load_thresholds(rules_session)
-        finally:
-            rules_session.close()
-
-        # The automation module changes the state in place, logs each execution
-        # and stores its notifying messages itself.
-        automation_step.evaluate(self.state, automations, self.state.sim_time)
-        messages = alerts.evaluate(self.state, thresholds, self.state.sim_time)
-
         session = self._db_factory()
         try:
-            for message in messages:
-                session.merge(self._message_row(message))
-
-            history.record(session, self.state)
-            self.state.open_messages = self._count_open_messages(session)
-            persistence.save(session, self.state, self.settings)
-            session.commit()
-            self._automations = automations
-            self._thresholds = thresholds
-        except Exception:
-            session.rollback()
-            raise
+            return self._load_automations(session), self._load_thresholds(session)
         finally:
             session.close()
 

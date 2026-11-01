@@ -21,12 +21,14 @@ from ..schemas import (
     SettingsOut,
     ThresholdOut,
 )
+from .weather import season_daylight
 
 DEFAULT_SEED = 42
 DEFAULT_START_TIME = "2026-06-15T08:00:00"
 DEFAULT_WEEKDAY = "Montag"
-DEFAULT_SUNRISE = "06:00"
-DEFAULT_SUNSET = "21:00"
+# The factory house starts in summer, so it starts with the summer daylight the
+# weather step keeps from the first tick on.
+DEFAULT_SUNRISE, DEFAULT_SUNSET = season_daylight("summer")
 
 ROOM_DEFINITIONS: tuple[tuple[str, str, float, float, float], ...] = (
     ("living_room", "Wohnzimmer", 21.5, 48.0, 620.0),
@@ -69,6 +71,7 @@ def _heating(room_id: str, target_temp: float) -> DeviceState:
         name="Heizung",
         type="heating",
         is_on=active,
+        level=100 if active else 0,
         target_temp=target_temp,
         power_w=700.0 if active else 0.0,
         state_text="Heizung heizt" if active else "Heizung aus",
