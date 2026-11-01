@@ -8,7 +8,7 @@
  * the server's German message.
  */
 
-import { useCallback, useEffect, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactElement } from "react";
 
 import { MessageRow } from "../features/messages/MessageRow";
 import { ApiError, ackMessage, getMessages } from "../lib/api";
@@ -38,10 +38,13 @@ export function Messages(): ReactElement {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const acknowledgedIds = useRef(new Set<string>());
+  const loadSequence = useRef(0);
   const tick = state?.tick ?? null;
 
   useEffect(() => {
     let disposed = false;
+    const sequence = ++loadSequence.current;
 
     const load = async (): Promise<void> => {
       try {
@@ -49,13 +52,17 @@ export function Messages(): ReactElement {
           getMessages("open"),
           getMessages("acknowledged"),
         ]);
-        if (!disposed) {
-          setOpenMessages(open);
+        // The clock reloads the lists every tick, so a response that was
+        // requested before a confirmation or superseded by a newer reload must
+        // not put an already acknowledged message back into the open group.
+        if (!disposed && sequence === loadSequence.current) {
+          const acknowledged = acknowledgedIds.current;
+          setOpenMessages(open.filter((item) => !acknowledged.has(item.id)));
           setDoneMessages(done);
           setLoadError(null);
         }
       } catch (error) {
-        if (!disposed) {
+        if (!disposed && sequence === loadSequence.current) {
           setLoadError(errorMessage(error));
         }
       }
@@ -72,6 +79,10 @@ export function Messages(): ReactElement {
     setPendingId(message.id);
     try {
       const acknowledged = await ackMessage(message.id);
+      acknowledgedIds.current.add(message.id);
+      // Discard reloads that were already in flight when the confirmation
+      // happened, then move the row over without waiting for the next tick.
+      loadSequence.current += 1;
       setOpenMessages((current) => current.filter((item) => item.id !== message.id));
       setDoneMessages((current) => withAcknowledged(current, acknowledged));
       setActionError(null);

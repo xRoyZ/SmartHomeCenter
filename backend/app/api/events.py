@@ -13,18 +13,27 @@ from fastapi import APIRouter, Request
 
 from ..db import get_session_factory
 from ..models import Message as MessageRow
-from ..schemas import ApiError, EventRequest, EventResult, MessageOut
-from ..simulation import events
+from ..models import Room
+from ..schemas import ApiError, EventRequest, EventResult, HouseState, MessageOut
+from ..simulation import alerts, events
 from ..ws import manager
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
 
-def _store_message(message: MessageOut) -> None:
-    """Persist the event message so it appears in the message list."""
+def _store_message(state: HouseState, message: MessageOut) -> None:
+    """Persist the event message and its room so the list can name the room.
+
+    The message list joins the room table for the room name. On a freshly
+    started store that table is only filled by the first tick, so an event
+    triggered before it would otherwise be listed without its room.
+    """
 
     session = get_session_factory()()
     try:
+        room = next((item for item in state.rooms if item.id == message.room_id), None)
+        if room is not None:
+            session.merge(Room(id=room.id, name=room.name))
         session.merge(
             MessageRow(
                 id=message.id,
@@ -66,6 +75,7 @@ async def trigger_event(
     message = events.apply(
         state, event_type, payload.room_id, _event_rng(engine, event_type, payload.room_id)
     )
-    _store_message(message)
+    _store_message(state, message)
+    alerts.remember_state(state)
     await manager.broadcast(state)
     return EventResult(message=message, state=state)
