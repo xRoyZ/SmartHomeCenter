@@ -1,9 +1,9 @@
 /**
  * Navigation slot of the application shell.
  *
- * The skeleton ships the five primary areas of the approved tab bar so every
- * screen is reachable from the shell. The UI kit ticket owns the final frame
- * region, including its icons and counts.
+ * Renders the frame's tab bar with the five primary areas of the approved
+ * screens. On a phone it sits at the bottom, from 960 px the stylesheet turns
+ * it into the rail beside the content.
  */
 
 import type { ReactElement } from "react";
@@ -93,13 +93,25 @@ function isCurrent(item: NavItem, pathname: string): boolean {
   return pathname === item.to || pathname.startsWith(`${item.to}/`);
 }
 
-export function Nav(): ReactElement {
+export interface NavProps {
+  openMessages?: number;
+  activePath?: string;
+  label?: string;
+}
+
+export function Nav({
+  openMessages,
+  activePath,
+  label = "Hauptnavigation",
+}: NavProps): ReactElement {
   const { pathname } = useLocation();
+  const currentPath = activePath ?? pathname;
 
   return (
-    <nav className="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <nav className="tabs" aria-label={label} data-od-id="tabbar">
       {ITEMS.map((item) => {
-        const current = isCurrent(item, pathname);
+        const current = isCurrent(item, currentPath);
+        const count = item.to === "/messages" ? openMessages : undefined;
         return (
           <Link
             key={item.to}
@@ -109,6 +121,7 @@ export function Nav(): ReactElement {
           >
             <span className="ico">
               <NavIcon name={item.icon} />
+              {count && count > 0 ? <span className="count">{count}</span> : null}
             </span>
             {item.label}
           </Link>
