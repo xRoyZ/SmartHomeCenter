@@ -1,0 +1,5 @@
+/* Spacing the overview needs around kit components; every value is a token. */
+
+.overview-error {
+  margin: var(--s2) var(--pad) 0;
+}
