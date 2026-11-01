@@ -155,6 +155,7 @@ class HouseState(BaseModel):
     tick: int
     paused: bool
     speed: SimSpeed
+    seed: int
     outdoor: OutdoorState
     totals: HouseTotals
     open_messages: int
