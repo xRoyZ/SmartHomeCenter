@@ -31,11 +31,12 @@ _ALERT_SEVERITY: dict[MessageKind, MessageSeverity] = {
 class _StateMemory:
     """Remember which alerts a house already reported and its last consumption."""
 
-    __slots__ = ("active", "last_power")
+    __slots__ = ("active", "last_power", "thresholds")
 
     def __init__(self, last_power: float) -> None:
         self.active: set[tuple[str, str | None]] = set()
         self.last_power = last_power
+        self.thresholds: list[ThresholdOut] | None = None
 
 
 _MEMORIES: dict[int, tuple[weakref.ReferenceType[HouseState], _StateMemory]] = {}
@@ -56,6 +57,28 @@ def _memory_for(state: HouseState) -> _StateMemory:
 
     _MEMORIES[key] = (weakref.ref(state, _forget), memory)
     return memory
+
+
+def remember_state(state: HouseState) -> None:
+    """Treat every condition the state currently shows as already alerted.
+
+    A manual event changes the house state outside the tick and stores its
+    message immediately. Without this the next threshold evaluation would
+    report the same condition a second time under a different text (and the
+    limits the event pushed past would appear as extra messages), so the
+    event's one visible message would be shadowed by duplicates. The
+    conditions stay marked until they clear, which keeps the evaluator's
+    edge-triggered behaviour.
+
+    The evaluator caches the thresholds of the last tick for this, so an event
+    between two ticks is judged against exactly the limits the next tick will
+    use; before the first tick the factory defaults apply, as they do to the
+    engine.
+    """
+
+    memory = _memory_for(state)
+    thresholds = memory.thresholds or house.default_thresholds()
+    memory.active = set(_triggered(state, thresholds, state.sim_time, memory))
 
 
 def _threshold_values(thresholds: list[ThresholdOut]) -> dict[str, float]:
@@ -91,17 +114,15 @@ def _message(
     )
 
 
-def evaluate(state: HouseState, thresholds: list[ThresholdOut], sim_time: str) -> list[MessageOut]:
-    """Evaluate thresholds and return the messages they produced.
-
-    Only limits that a room just crossed produce a message: a condition that is
-    already covered by an open alert of the same kind and room stays silent
-    until it clears and is crossed again. The engine stores the returned
-    messages and broadcasts the updated state.
-    """
+def _triggered(
+    state: HouseState,
+    thresholds: list[ThresholdOut],
+    sim_time: str,
+    memory: _StateMemory,
+) -> dict[tuple[str, str | None], MessageOut]:
+    """Return every alert condition the current state shows, keyed by condition."""
 
     values = _threshold_values(thresholds)
-    memory = _memory_for(state)
 
     min_temperature = values["min_temperature"]
     max_temperature = values["max_temperature"]
@@ -179,6 +200,21 @@ def evaluate(state: HouseState, thresholds: list[ThresholdOut], sim_time: str) -
             sim_time,
         )
 
+    return triggered
+
+
+def evaluate(state: HouseState, thresholds: list[ThresholdOut], sim_time: str) -> list[MessageOut]:
+    """Evaluate thresholds and return the messages they produced.
+
+    Only limits that a room just crossed produce a message: a condition that is
+    already covered by an open alert of the same kind and room stays silent
+    until it clears and is crossed again. The engine stores the returned
+    messages and broadcasts the updated state.
+    """
+
+    memory = _memory_for(state)
+    memory.thresholds = thresholds
+    triggered = _triggered(state, thresholds, sim_time, memory)
     produced = [message for key, message in triggered.items() if key not in memory.active]
     memory.active = set(triggered)
     return produced

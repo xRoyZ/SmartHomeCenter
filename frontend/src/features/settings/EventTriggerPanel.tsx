@@ -119,7 +119,7 @@ export function EventTriggerPanel(): ReactElement {
 
   return (
     <Group title="Ereignisse auslösen" ariaLabel="Ereignisse auslösen" id="settings-events">
-      <div className="events">
+      <div className="events" data-od-id="events">
         {EVENTS.map((event) => (
           <button
             key={event.type}
