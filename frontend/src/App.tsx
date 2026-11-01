@@ -14,6 +14,7 @@ import { DeviceDetail } from "./pages/DeviceDetail";
 import { History } from "./pages/History";
 import { HouseOverview } from "./pages/HouseOverview";
 import { Messages } from "./pages/Messages";
+import { NotFound } from "./pages/NotFound";
 import { RoomDetail } from "./pages/RoomDetail";
 import { Settings } from "./pages/Settings";
 import { Thresholds } from "./pages/Thresholds";
@@ -44,6 +45,7 @@ export function App(): ReactElement {
             }
           />
         ) : null}
+        <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
   );
