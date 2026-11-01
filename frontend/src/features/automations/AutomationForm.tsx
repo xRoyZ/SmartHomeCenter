@@ -315,17 +315,6 @@ export function AutomationForm({
           onChange={handleWhenChange}
         />
 
-        <Select
-          label="Raum für Bedingung und Aktion"
-          options={rooms.map((room) => ({ value: room.id, label: room.name }))}
-          value={roomId}
-          onChange={(next) => {
-            setRoomId(next);
-            setError(null);
-          }}
-          disabled={rooms.length === 0}
-        />
-
         {isConditionWithValue(when) ? (
           <Field
             label={when === "co2_above" ? "Grenzwert (ppm)" : "Grenzwert (°C)"}
@@ -368,6 +357,17 @@ export function AutomationForm({
             inputMode="decimal"
           />
         ) : null}
+
+        <Select
+          label="Raum für Bedingung und Aktion"
+          options={rooms.map((room) => ({ value: room.id, label: room.name }))}
+          value={roomId}
+          onChange={(next) => {
+            setRoomId(next);
+            setError(null);
+          }}
+          disabled={rooms.length === 0}
+        />
 
         <Checkbox checked={notify} onChange={setNotify}>
           Mit Meldung

@@ -255,77 +255,104 @@ export function Automations(): ReactElement {
                 Noch keine Automation angelegt. Legen Sie unten die erste Regel an.
               </EmptyState>
             ) : null}
-            {automations.map((rule) => {
+            {automations.map((rule, index) => {
               const last = latestExecution(executions[rule.id]);
               const conditionText = describeCondition(rule.condition);
               const actionText = describeAction(rule.action);
               return (
-                <article className="rule" key={rule.id}>
-                  <div className="cols">
-                    <div className="col">
-                      <span className="label">Wenn</span>
-                      <p>{conditionText}</p>
-                    </div>
-                    <div className="col">
-                      <span className="label">Dann</span>
-                      <p>
-                        {actionText}
-                        {rule.notify ? ", mit Meldung" : ""}
-                      </p>
-                    </div>
-                  </div>
-                  <footer>
-                    <span className="last">
-                      {last ? (
-                        <>
-                          Zuletzt{" "}
-                          <time
-                            dateTime={last.sim_time}
-                            aria-label={`Simulierte Uhrzeit ${formatSimTime(last.sim_time)}`}
-                          >
-                            {formatSimTime(last.sim_time)}
-                          </time>
-                        </>
-                      ) : (
-                        "Noch nie ausgeführt"
-                      )}
+                <div key={rule.id}>
+                  <header
+                    style={{
+                      display: "flex",
+                      alignItems: "baseline",
+                      gap: "var(--s2)",
+                      paddingTop: "var(--s3)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontFamily: "var(--disp)",
+                        fontWeight: "var(--w-disp)",
+                        fontSize: "var(--fs-17)",
+                        letterSpacing: "0.06em",
+                      }}
+                    >
+                      {rule.name}
                     </span>
-                    <div style={ACTION_ROW_STYLE}>
-                      <IconButton
-                        label={`Regel „${rule.name}“ bearbeiten`}
-                        onClick={() => openEdit(rule)}
-                        disabled={busyId === rule.id}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        label={`Regel „${rule.name}“ löschen`}
-                        onClick={() => {
-                          void removeRule(rule);
-                        }}
-                        disabled={busyId === rule.id}
-                      >
-                        <TrashIcon />
-                      </IconButton>
-                      <button
-                        type="button"
-                        role="switch"
-                        className="apill"
-                        aria-checked={rule.enabled}
-                        aria-label={`Regel ${conditionText}, ${actionText}`}
-                        disabled={busyId === rule.id}
-                        style={busyId === rule.id ? { opacity: 0.45 } : undefined}
-                        onClick={() => {
-                          void toggleRule(rule);
-                        }}
-                      >
-                        <span>
-                          <span>{rule.enabled ? "aktiv" : "inaktiv"}</span>
-                        </span>
-                      </button>
+                  </header>
+                  <article
+                    className="rule"
+                    style={{
+                      borderBottom:
+                        index === automations.length - 1 ? "1px solid var(--line)" : "none",
+                    }}
+                  >
+                    <div className="cols">
+                      <div className="col">
+                        <span className="label">Wenn</span>
+                        <p>{conditionText}</p>
+                      </div>
+                      <div className="col">
+                        <span className="label">Dann</span>
+                        <p>
+                          {actionText}
+                          {rule.notify ? ", mit Meldung" : ""}
+                        </p>
+                      </div>
                     </div>
-                  </footer>
-                </article>
+                    <footer>
+                      <span className="last">
+                        {last ? (
+                          <>
+                            Zuletzt{" "}
+                            <time
+                              dateTime={last.sim_time}
+                              aria-label={`Simulierte Uhrzeit ${formatSimTime(last.sim_time)}`}
+                            >
+                              {formatSimTime(last.sim_time)}
+                            </time>
+                          </>
+                        ) : (
+                          "Noch nie ausgeführt"
+                        )}
+                      </span>
+                      <div style={ACTION_ROW_STYLE}>
+                        <IconButton
+                          label={`Regel „${rule.name}“ bearbeiten`}
+                          onClick={() => openEdit(rule)}
+                          disabled={busyId === rule.id}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          label={`Regel „${rule.name}“ löschen`}
+                          onClick={() => {
+                            void removeRule(rule);
+                          }}
+                          disabled={busyId === rule.id}
+                        >
+                          <TrashIcon />
+                        </IconButton>
+                        <button
+                          type="button"
+                          role="switch"
+                          className="apill"
+                          aria-checked={rule.enabled}
+                          aria-label={`Regel ${conditionText}, ${actionText}`}
+                          disabled={busyId === rule.id}
+                          style={busyId === rule.id ? { opacity: 0.45 } : undefined}
+                          onClick={() => {
+                            void toggleRule(rule);
+                          }}
+                        >
+                          <span>
+                            <span>{rule.enabled ? "aktiv" : "inaktiv"}</span>
+                          </span>
+                        </button>
+                      </div>
+                    </footer>
+                  </article>
+                </div>
               );
             })}
           </div>

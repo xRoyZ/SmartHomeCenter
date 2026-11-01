@@ -87,6 +87,15 @@ describe("UI kit gallery", () => {
     }
   });
 
+  it("puts the room name inside the level-1 heading", () => {
+    const view = renderGallery();
+
+    const heading = view.querySelector(".roomhead h1");
+    expect(heading).not.toBeNull();
+    expect(heading?.querySelector(".nm.name")?.textContent).toBe("Wohnzimmer");
+    expect(heading?.textContent).toContain("Wohnzimmer");
+  });
+
   it("labels the header as simulated and shows the seed", () => {
     const view = renderGallery();
 

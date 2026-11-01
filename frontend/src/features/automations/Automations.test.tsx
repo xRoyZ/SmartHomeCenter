@@ -217,6 +217,20 @@ describe("automations screen", () => {
     );
   });
 
+  it("shows the rule name above its condition and action", async () => {
+    const namedRule = { ...RULE, name: "Meine Fensterregel" };
+    vi.mocked(api.getAutomations).mockResolvedValue([namedRule]);
+
+    const view = renderPage();
+    await settle();
+
+    const article = view.querySelector("article.rule");
+    expect(article).not.toBeNull();
+    const header = article?.previousElementSibling;
+    expect(header?.tagName).toBe("HEADER");
+    expect(header?.textContent).toBe("Meine Fensterregel");
+  });
+
   it("switches an existing rule off without removing it", async () => {
     vi.mocked(api.getAutomations).mockResolvedValue([RULE]);
     vi.mocked(api.getExecutions).mockResolvedValue([

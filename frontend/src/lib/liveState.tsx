@@ -29,6 +29,22 @@ const LiveStateContext = createContext<LiveStateValue | undefined>(undefined);
 const RECONNECT_DELAY_MS = 1500;
 const GENERIC_ERROR = "Die Verbindung zum Server ist fehlgeschlagen.";
 
+/**
+ * Resolve the socket address of the configured API base.
+ *
+ * An absolute base already carries its own host. A relative base (the product
+ * served next to its API) needs the page's origin, because `WebSocket` rejects
+ * a path-only URL.
+ */
+function socketAddress(): string {
+  const url = websocketUrl();
+  if (/^wss?:\/\//i.test(url)) {
+    return url;
+  }
+  const origin = window.location.origin.replace(/^http/i, "ws");
+  return `${origin}${url.startsWith("/") ? "" : "/"}${url}`;
+}
+
 function messageFor(error: unknown): string {
   if (error instanceof ApiError) {
     return error.message;
@@ -51,6 +67,7 @@ export function LiveStateProvider({ children }: { children: ReactNode }): ReactE
     let disposed = false;
     let socket: WebSocket | null = null;
     let retryTimer: number | null = null;
+    let socketSnapshotReceived = false;
 
     const scheduleReconnect = () => {
       if (disposed || retryTimer !== null) {
@@ -70,6 +87,7 @@ export function LiveStateProvider({ children }: { children: ReactNode }): ReactE
         return;
       }
       if (message.type === "snapshot" && message.payload) {
+        socketSnapshotReceived = true;
         setState(message.payload);
         setError(null);
       } else if (message.type === "error" && message.error?.message) {
@@ -82,7 +100,7 @@ export function LiveStateProvider({ children }: { children: ReactNode }): ReactE
         return;
       }
       try {
-        socket = new WebSocket(websocketUrl());
+        socket = new WebSocket(socketAddress());
       } catch {
         scheduleReconnect();
         return;
@@ -113,7 +131,9 @@ export function LiveStateProvider({ children }: { children: ReactNode }): ReactE
     const loadSnapshot = async () => {
       try {
         const snapshot = await getState();
-        if (!disposed) {
+        // A socket frame that arrived while the request was in flight is
+        // newer than this response; keeping it avoids a step backwards.
+        if (!disposed && !socketSnapshotReceived) {
           setState(snapshot);
           setError(null);
         }
