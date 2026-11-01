@@ -54,8 +54,10 @@ export function PageHead({
         id={id}
         className={cn("pagehead", variant === "room" && "roomhead", className)}
       >
-        {name ? <span className="name nm">{name}</span> : null}
-        <h1>{title}</h1>
+        <h1>
+          {name ? <span className="name nm">{name}</span> : null}
+          {title}
+        </h1>
         {description ? <p>{description}</p> : null}
       </div>
     </>
