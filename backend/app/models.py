@@ -6,7 +6,7 @@ plain simulator keys; no personal data of a browser is ever stored here.
 
 from __future__ import annotations
 
-from sqlalchemy import Boolean, Float, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -114,3 +114,4 @@ class SimState(Base):
     sunrise: Mapped[str] = mapped_column(String(8), nullable=False)
     sunset: Mapped[str] = mapped_column(String(8), nullable=False)
     solar_w: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    state_json: Mapped[str | None] = mapped_column(Text, nullable=True)
