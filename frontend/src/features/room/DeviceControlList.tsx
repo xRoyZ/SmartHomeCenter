@@ -16,7 +16,7 @@ import {
   formatTemperature,
 } from "../../lib/format";
 import type { DeviceCommand, DeviceState } from "../../lib/types";
-import { Group, Slider, Stepper, Toggle } from "../../ui";
+import { Slider, Stepper, Toggle } from "../../ui";
 
 export interface DeviceControlListProps {
   devices: readonly DeviceState[];
@@ -80,7 +80,10 @@ function LightRow({
     <div className="dev-row" data-od-id="dev-light">
       <DeviceName device={device} />
       <span className="val">
-        <b>{device.is_on ? "Licht an" : "Licht aus"}</b> · {formatPercent(level)}
+        <b id="light-state" data-on="Licht an" data-off="Licht aus">
+          {device.is_on ? "Licht an" : "Licht aus"}
+        </b>{" "}
+        · <span id="light-val">{formatPercent(level)}</span>
       </span>
       <span className="ctl">
         <Toggle
@@ -241,7 +244,8 @@ export function DeviceControlList({
   onCommand,
 }: DeviceControlListProps): ReactElement {
   return (
-    <Group title="Geräte" ariaLabel="Geräte bedienen">
+    <section className="group" data-od-id="devices" aria-label="Geräte bedienen">
+      <h2>Geräte</h2>
       <div className="dev">
         {devices.map((device) => {
           if (device.type === "heating") {
@@ -287,6 +291,6 @@ export function DeviceControlList({
           );
         })}
       </div>
-    </Group>
+    </section>
   );
 }

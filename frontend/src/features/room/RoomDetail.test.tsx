@@ -170,6 +170,20 @@ function shutterSlider(): HTMLInputElement {
   return slider;
 }
 
+function lightSwitch(): HTMLButtonElement {
+  const button = document.querySelector<HTMLButtonElement>(
+    "button[role='switch'][aria-label='Licht Wohnzimmer']",
+  );
+  if (!button) {
+    throw new Error("light switch is missing");
+  }
+  return button;
+}
+
+function lightStateText(): string | null {
+  return document.querySelector("#light-state")?.textContent ?? null;
+}
+
 function moveSlider(slider: HTMLInputElement, value: string): void {
   const setter = Object.getOwnPropertyDescriptor(
     window.HTMLInputElement.prototype,
@@ -204,10 +218,67 @@ afterEach(() => {
   }
   container?.remove();
   container = null;
+  vi.useRealTimers();
   vi.clearAllMocks();
 });
 
 describe("room detail", () => {
+  it("states the light in plain text and shows the switched state", async () => {
+    await renderRoom();
+
+    const region = container?.querySelector('[data-od-id="devices"]');
+    expect(region).not.toBeNull();
+    expect(region?.textContent).toContain("Licht an");
+    expect(lightStateText()).toBe("Licht an");
+
+    await act(async () => {
+      lightSwitch().click();
+    });
+
+    expect(mocks.setDeviceState).toHaveBeenCalledWith("living_room_light", { is_on: false });
+    expect(lightStateText()).toBe("Licht aus");
+    expect(region?.textContent).toContain("Licht aus");
+  });
+
+  it("hands the shown light state back to the simulation after the command hold", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2026-06-15T08:05:00"));
+
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const tree = () => (
+      <MemoryRouter initialEntries={["/rooms/living_room"]}>
+        <Routes>
+          <Route path="/rooms/:roomId" element={<RoomDetail />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await act(async () => {
+      root?.render(tree());
+    });
+
+    await act(async () => {
+      lightSwitch().click();
+    });
+    expect(lightStateText()).toBe("Licht aus");
+
+    // A snapshot still carries the reverted (on) state while the hold runs.
+    mocks.liveState.current = { ...house };
+    await act(async () => {
+      root?.render(tree());
+    });
+    expect(lightStateText()).toBe("Licht aus");
+
+    // Once the hold has elapsed, the live snapshot owns the shown state again.
+    vi.setSystemTime(new Date("2026-06-15T08:05:02"));
+    mocks.liveState.current = { ...house };
+    await act(async () => {
+      root?.render(tree());
+    });
+    expect(lightStateText()).toBe("Licht an");
+  });
+
   it("sends a shutter movement as the simulation's open percentage", async () => {
     await renderRoom();
 
