@@ -35,7 +35,6 @@ export function Messages(): ReactElement {
   const { state } = useLiveState();
   const [openMessages, setOpenMessages] = useState<MessageOut[]>([]);
   const [doneMessages, setDoneMessages] = useState<MessageOut[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
@@ -54,12 +53,10 @@ export function Messages(): ReactElement {
           setOpenMessages(open);
           setDoneMessages(done);
           setLoadError(null);
-          setLoaded(true);
         }
       } catch (error) {
         if (!disposed) {
           setLoadError(errorMessage(error));
-          setLoaded(true);
         }
       }
     };
@@ -116,7 +113,7 @@ export function Messages(): ReactElement {
             />
           ))}
         </ul>
-        {loaded && !loadError && openMessages.length === 0 ? (
+        {!loadError && openMessages.length === 0 ? (
           <EmptyState>Alles bestätigt — das Haus hat gerade nichts zu melden.</EmptyState>
         ) : null}
       </section>
@@ -135,7 +132,7 @@ export function Messages(): ReactElement {
             <MessageRow key={message.id} message={message} />
           ))}
         </ul>
-        {loaded && !loadError && doneMessages.length === 0 ? (
+        {!loadError && doneMessages.length === 0 ? (
           <EmptyState>Noch nichts bestätigt.</EmptyState>
         ) : null}
       </section>

@@ -155,6 +155,33 @@ describe("messages screen", () => {
     expect(view.querySelector(".group-done .empty")?.textContent).toBe("Noch nichts bestätigt.");
   });
 
+  it("renders every message as a list item inside its group", async () => {
+    const view = await renderMessages();
+
+    const openItems = view.querySelectorAll<HTMLLIElement>("#list-open > li.mrow");
+    expect(openItems).toHaveLength(1);
+    expect(openItems[0].textContent).toContain("Hohe Luftfeuchte 78 %");
+    expect(openItems[0].querySelector(".act")?.textContent).toBe("Bestätigen");
+    expect(view.querySelector("#list-open .listrow-static")).toBeNull();
+
+    const doneItems = view.querySelectorAll<HTMLLIElement>("#list-done > li.mrow");
+    expect(doneItems).toHaveLength(1);
+    expect(doneItems[0].querySelector(".act")?.textContent).toBe("bestätigt 06:40");
+  });
+
+  it("shows the empty caption only in the group that has no messages", async () => {
+    vi.mocked(getMessages).mockImplementation((status) =>
+      Promise.resolve(status === "open" ? [openMessage] : []),
+    );
+
+    const view = await renderMessages();
+
+    expect(view.querySelector(".group-open .empty")).toBeNull();
+    expect(view.querySelector(".group-done .empty")?.textContent).toBe("Noch nichts bestätigt.");
+    expect(view.querySelectorAll("#list-open > li.mrow")).toHaveLength(1);
+    expect(view.querySelectorAll("#list-done > li.mrow")).toHaveLength(0);
+  });
+
   it("shows the ApiError message and keeps both lists when acknowledging fails", async () => {
     vi.mocked(ackMessage).mockRejectedValue(
       new ApiError("unknown_message", "Die Meldung wurde nicht gefunden."),

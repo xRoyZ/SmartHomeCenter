@@ -10,7 +10,7 @@ import type { ReactElement } from "react";
 
 import { formatSimTime } from "../../lib/format";
 import type { MessageOut, MessageSeverity } from "../../lib/types";
-import { Badge, Button, ListRow, type BadgeTone } from "../../ui";
+import { Badge, Button, type BadgeTone } from "../../ui";
 
 interface SeverityMark {
   tone: BadgeTone;
@@ -39,7 +39,7 @@ export function MessageRow({
   const severity = SEVERITY[message.severity];
 
   return (
-    <ListRow className="mrow">
+    <li className="mrow">
       <Badge tone={severity.tone}>{severity.label}</Badge>
       <span className="room-n">{message.room_name ?? "Haus"}</span>
       <time dateTime={message.created_at}>{formatSimTime(message.created_at)}</time>
@@ -62,6 +62,6 @@ export function MessageRow({
             : "bestätigt"}
         </span>
       )}
-    </ListRow>
+    </li>
   );
 }
