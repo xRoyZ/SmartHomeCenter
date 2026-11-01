@@ -34,6 +34,14 @@ const openMessage: MessageOut = {
 
 const doneMessage: MessageOut = { ...openMessage, acknowledged_at: "2026-06-15T07:40:00" };
 
+const staleMessage: MessageOut = {
+  ...openMessage,
+  id: "open-2",
+  room_id: "bathroom",
+  room_name: "Badezimmer",
+  text: "Wasserschaden in Badezimmer erkannt.",
+};
+
 interface PendingLoad {
   status: string;
   resolve: (messages: MessageOut[]) => void;
@@ -106,14 +114,14 @@ afterEach(() => {
 });
 
 describe("message acknowledgement flow", () => {
-  it("keeps an acknowledged message out of the open group when a reload started earlier", async () => {
+  it("discards a reload requested before the confirmation and keeps the acknowledged message", async () => {
     vi.mocked(ackMessage).mockResolvedValue(doneMessage);
     const view = await renderMessages();
     expect(view.querySelectorAll("#list-open > li.mrow")).toHaveLength(1);
 
     deferLoads = true;
     await nextTick();
-    pendingLoads = [];
+    expect(pendingLoads.map((load) => load.status).sort()).toEqual(["acknowledged", "open"]);
 
     const button = view.querySelector<HTMLButtonElement>("#list-open .act");
     await act(async () => {
@@ -125,14 +133,19 @@ describe("message acknowledgement flow", () => {
     expect(view.querySelectorAll("#list-open > li.mrow")).toHaveLength(0);
     expect(view.querySelectorAll("#list-done > li.mrow")).toHaveLength(1);
 
+    // The reload that started before the confirmation answers now. Its open
+    // list would put the acknowledged row back (and add a message that arrived
+    // in the meantime), so the stale response must be dropped as a whole.
     deferLoads = false;
-    resolvePending("open", [openMessage]);
+    resolvePending("open", [openMessage, staleMessage]);
     resolvePending("acknowledged", []);
     await settle();
     await settle();
 
     expect(view.querySelectorAll("#list-open > li.mrow")).toHaveLength(0);
+    expect(view.querySelector("#list-open")?.textContent).not.toContain("Rauchmelder");
     expect(view.querySelector("#list-done")?.textContent).toContain("bestätigt 07:40");
     expect(view.querySelector("#count-open")?.textContent).toBe("0");
+    expect(view.querySelector("#count-done")?.textContent).toBe("1");
   });
 });
