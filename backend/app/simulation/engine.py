@@ -320,6 +320,7 @@ class SimulationEngine:
             # and a new seed always restarts the reproducible sequence.
             self._rng_seed = self.settings.seed
             self._rng = random.Random(self.settings.seed)
+        self.state.seed = int(self.settings.seed)
         # The occupant step receives no settings argument, so the engine hands
         # the mode over before every step; that also covers a state and settings
         # restored directly by the lifespan after construction.

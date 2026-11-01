@@ -208,6 +208,7 @@ def build_house(seed: int) -> HouseState:
         tick=0,
         paused=False,
         speed=1,
+        seed=seed,
         outdoor=outdoor,
         totals=HouseTotals(
             power_w=total_power,
