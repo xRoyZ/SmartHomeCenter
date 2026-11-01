@@ -38,6 +38,7 @@ import {
 const GENERIC_ERROR = "Ein interner Fehler ist aufgetreten.";
 const CHART_METRIC = "temperature";
 const CHART_WINDOW = "1h";
+const REFRESH_MS = 5000;
 
 function messageFor(error: unknown): string {
   if (error instanceof ApiError) {
@@ -108,6 +109,7 @@ export function RoomDetail(): ReactElement {
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, setPending] = useState<Record<string, DeviceCommand>>({});
   const [series, setSeries] = useState<HistorySeries | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -133,30 +135,48 @@ export function RoomDetail(): ReactElement {
     };
   }, [roomId]);
 
-  const simMinute = state?.sim_time.slice(0, 16) ?? "";
-
   useEffect(() => {
     let cancelled = false;
     if (!roomId) {
       return undefined;
     }
-    getHistory({ room_id: roomId, metric: CHART_METRIC, window: CHART_WINDOW })
-      .then((value) => {
-        if (!cancelled) {
-          setSeries(value);
-          setHistoryError(null);
-        }
-      })
-      .catch((error: unknown) => {
-        if (!cancelled) {
-          setSeries(null);
-          setHistoryError(messageFor(error));
-        }
-      });
+
+    const load = (initial: boolean) => {
+      if (initial) {
+        setSeries(null);
+        setHistoryError(null);
+        setHistoryLoading(true);
+      }
+      getHistory({ room_id: roomId, metric: CHART_METRIC, window: CHART_WINDOW })
+        .then((value) => {
+          if (!cancelled) {
+            setSeries(value);
+            setHistoryError(null);
+          }
+        })
+        .catch((error: unknown) => {
+          if (!cancelled) {
+            setSeries(null);
+            setHistoryError(messageFor(error));
+          }
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setHistoryLoading(false);
+          }
+        });
+    };
+
+    // The simulated clock advances up to 300 times per real second, so the
+    // series is refreshed on a real-time cadence rather than on every tick.
+    load(true);
+    const timer = window.setInterval(() => load(false), REFRESH_MS);
+
     return () => {
       cancelled = true;
+      window.clearInterval(timer);
     };
-  }, [roomId, simMinute]);
+  }, [roomId]);
 
   // The optimistic value stays until a snapshot confirms the command, so a
   // broadcast from another client can never snap a control back mid-command.
@@ -240,16 +260,19 @@ export function RoomDetail(): ReactElement {
       <PageHead
         crumb={{ to: "/", label: "Haus" }}
         variant="room"
-        name={room.name}
         title={
-          <span className="bigfig">
-            <span className="n">{formatNumber(room.sensors.temperature, 1)}</span>
-            <span className="u">°C</span>
-          </span>
+          <>
+            <span className="nm">{room.name}</span>
+            <span className="bigfig">
+              <span className="n">{formatNumber(room.sensors.temperature, 1)}</span>
+              <span className="u">°C</span>
+            </span>
+          </>
         }
         description={
           <span className="sentence" style={{ color: "var(--ink)" }}>
             {room.status_text}
+            {heating ? ` · ${heating.state_text}` : ""}
           </span>
         }
       />
@@ -285,7 +308,11 @@ export function RoomDetail(): ReactElement {
               axisLabels={axisLabels}
               legend={legend}
               right
-              emptyText="Noch keine Messwerte für diesen Raum."
+              emptyText={
+                historyLoading
+                  ? "Der Verlauf wird geladen …"
+                  : "Noch keine Messwerte für diesen Raum."
+              }
             />
           )}
         </Group>

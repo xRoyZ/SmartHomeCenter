@@ -237,6 +237,47 @@ describe("history screen", () => {
     );
   });
 
+  it("renders the curve when the series arrives after the simulated clock advanced", async () => {
+    const pending: Array<(series: HistorySeries) => void> = [];
+    getHistoryMock.mockImplementation(
+      () =>
+        new Promise<HistorySeries>((resolve) => {
+          pending.push(resolve);
+        }),
+    );
+
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const element = (
+      <MemoryRouter>
+        <History />
+      </MemoryRouter>
+    );
+    await act(async () => {
+      root?.render(element);
+    });
+
+    await vi.waitFor(() => {
+      expect(getHistoryMock).toHaveBeenCalledTimes(1);
+    });
+
+    houseState.sim_time = "2026-06-15T09:31:00";
+    await act(async () => {
+      root?.render(element);
+    });
+
+    await act(async () => {
+      pending[0]?.(SERIES);
+    });
+
+    await vi.waitFor(() => {
+      expect(container?.querySelector("svg.chart path.ln")).not.toBeNull();
+    });
+
+    houseState.sim_time = "2026-06-15T09:30:00";
+  });
+
   it("shows the German empty state for a series without readings", async () => {
     getHistoryMock.mockResolvedValue({ ...SERIES, points: [] });
 
