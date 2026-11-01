@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/rooms/:roomId">
+<title>Wohnzimmer — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-03, AC-04, AC-05, AC-15, AC-17, AC-23 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span>07:42</span></div>
+  </header>
+
+  <main>
+    <div class="view">
+      <a class="crumb" href="index.html"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/arrow-left" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"
+        /></svg>Haus</a>
+
+      <section class="roomhead" data-od-id="room-head" aria-label="Zustand des Raums">
+        <span class="nm">Wohnzimmer</span>
+        <div class="bigfig"><span class="n" data-wz-temp>21,4</span><span class="u">°C</span></div>
+        <p class="sentence">Fenster offen — Heizung heizt gegen</p>
+      </section>
+
+      <div class="split">
+        <section class="group" data-od-id="sensors" aria-label="Sensorwerte">
+          <h2>Sensoren · simuliert</h2>
+          <ul class="ledger">
+            <li><span class="k">Luftfeuchte</span><span class="v">46<small>%</small></span></li>
+            <li><span class="k">CO₂</span><span class="v">780<small>ppm</small></span></li>
+            <li><span class="k">Fenster</span><span class="v word">offen</span></li>
+            <li><span class="k">Tür</span><span class="v word">zu</span></li>
+            <li><span class="k">Bewegung</span><span class="v word">ja</span></li>
+            <li><span class="k">Verbrauch</span><span class="v">340<small>W</small></span></li>
+          </ul>
+        </section>
+
+        <section class="group" data-od-id="devices" aria-label="Geräte bedienen">
+          <h2>Geräte</h2>
+          <div class="dev">
+            <div class="dev-row" data-od-id="dev-heating">
+              <span class="name">Heizung</span>
+              <span class="val"><b>22,0 °C</b> Soll</span>
+              <span class="ctl stepper" data-stepper data-step="0.5" data-min="5" data-max="28" data-dec="1" data-unit="°C" data-value="22">
+                <button class="btn-secondary btn-square" data-dir="-1" aria-label="Solltemperatur senken"
+                  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/minus" aria-hidden="true"
+                    ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"
+                  /></svg
+                ></button>
+                <span class="val">22,0<small>°C</small></span>
+                <button class="btn-secondary btn-square" data-dir="1" aria-label="Solltemperatur erhöhen"
+                  ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/plus" aria-hidden="true"
+                    ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"
+                  /></svg
+                ></button>
+              </span>
+            </div>
+            <div class="dev-row" data-od-id="dev-heating-power">
+              <span class="name">Heizleistung</span>
+              <span class="val">Ist 21,4 °C · Ziel noch nicht erreicht</span>
+              <span class="ctl"><span class="stepper"><span class="val">64<small>%</small></span></span></span>
+            </div>
+            <div class="dev-row" data-od-id="dev-light">
+              <span class="name">Licht</span>
+              <span class="val"><b id="light-state" data-on="Licht an" data-off="Licht aus">Licht an</b> · <span id="light-val">70 %</span></span>
+              <button class="ctl sw" role="switch" aria-checked="true" data-out="light-state" data-range="light-range" aria-label="Licht Wohnzimmer"
+                ><span class="pill"
+                  ><span class="knob"
+                  ></span
+                  ><span class="txt">an</span
+                ></span
+              ></button>
+              <input class="full" id="light-range" type="range" min="0" max="100" step="5" value="70" data-out="light-val" aria-label="Helligkeit Licht in Prozent">
+            </div>
+            <div class="dev-row" data-od-id="dev-shutter">
+              <span class="name">Rollladen</span>
+              <span class="val"><b id="shutter-val">40 %</b> geschlossen</span>
+              <input class="full" id="shutter-range" type="range" min="0" max="100" step="5" value="40" data-out="shutter-val" aria-label="Rollladen in Prozent geschlossen">
+            </div>
+            <div class="dev-row" data-od-id="dev-plug">
+              <span class="name">Steckdose</span>
+              <span class="val"><b id="plug-state" data-on="Steckdose an" data-off="Steckdose aus">Steckdose aus</b> · 0 W</span>
+              <button class="ctl sw" role="switch" aria-checked="false" data-out="plug-state" aria-label="Steckdose Wohnzimmer"
+                ><span class="pill"
+                  ><span class="knob"
+                  ></span
+                  ><span class="txt">aus</span
+                ></span
+              ></button>
+            </div>
+          </div>
+        </section>
+
+        <section class="group wide chartwrap" data-od-id="room-chart" aria-label="Temperaturverlauf der letzten Stunde">
+          <h2>Verlauf letzte Stunde · Temperatur</h2>
+          <svg class="chart right" data-hover data-unit="°C" data-y0="112" data-v0="20.3" data-y1="46" data-v1="21.4" viewBox="0 0 400 140" preserveAspectRatio="none" role="img" aria-label="Temperatur sinkt bei offenem Fenster auf 20,3 °C und steigt mit der Heizung wieder auf 21,4 °C">
+            <line class="grid" x1="0" y1="10" x2="400" y2="10"/>
+            <line class="grid" x1="0" y1="70" x2="400" y2="70"/>
+            <line class="grid" x1="0" y1="130" x2="400" y2="130"/>
+            <path class="area" d="M0 70 L40 74 L80 86 L120 104 L160 112 L200 108 L240 94 L280 76 L320 62 L360 52 L400 46 L400 140 L0 140 Z"/>
+            <path class="ln" d="M0 70 L40 74 L80 86 L120 104 L160 112 L200 108 L240 94 L280 76 L320 62 L360 52 L400 46"/>
+          </svg>
+          <div class="axis"><span>06:42</span><span>07:12</span><span>07:42</span></div>
+          <div class="legend"><span><i></i>Temperatur Wohnzimmer</span><span>20,3 °C tiefster Wert 07:00</span></div>
+        </section>
+      </div>
+
+      <a class="btn-primary" href="geraet.html" data-od-id="open-device">Heizung Wohnzimmer öffnen<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/arrow-right" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7l-7 7"
+        /></svg
+      ></a>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

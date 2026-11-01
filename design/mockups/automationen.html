@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/automations">
+<title>Regeln — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-06, AC-15, AC-17, AC-21 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span>07:42</span></div>
+  </header>
+
+  <main>
+    <div class="view">
+      <div class="pagehead">
+        <h1>Regeln</h1>
+        <p>Wenn im Haus etwas eintritt, tut das Haus von selbst, was Sie festgelegt haben.</p>
+      </div>
+
+      <section class="group" data-od-id="rules" aria-label="Automationen">
+        <h2>Automationen · 3</h2>
+        <div id="rules">
+          <article class="rule" data-od-id="rule-window">
+            <div class="cols">
+              <div class="col"><span class="label">Wenn</span><p>Fenster offen</p></div>
+              <div class="col"><span class="label">Dann</span><p>Heizung aus</p></div>
+            </div>
+            <footer>
+              <span class="last">Zuletzt <time>07:38</time></span>
+              <button class="apill" role="switch" aria-checked="true" aria-label="Regel Fenster offen, Heizung aus"><span><span>aktiv</span></span></button>
+            </footer>
+          </article>
+          <article class="rule" data-od-id="rule-night">
+            <div class="cols">
+              <div class="col"><span class="label">Wenn</span><p>ab 22:00</p></div>
+              <div class="col"><span class="label">Dann</span><p>Rollladen schließen, mit Meldung</p></div>
+            </div>
+            <footer>
+              <span class="last">Zuletzt <time>06:02</time></span>
+              <button class="apill" role="switch" aria-checked="true" aria-label="Regel ab 22:00, Rollladen schließen"><span><span>aktiv</span></span></button>
+            </footer>
+          </article>
+          <article class="rule" data-od-id="rule-co2">
+            <div class="cols">
+              <div class="col"><span class="label">Wenn</span><p>CO₂ über 1.000 ppm</p></div>
+              <div class="col"><span class="label">Dann</span><p>Lüftungshinweis</p></div>
+            </div>
+            <footer>
+              <span class="last">Noch nie ausgeführt</span>
+              <button class="apill" role="switch" aria-checked="false" aria-label="Regel CO₂ über 1.000 ppm, Lüftungshinweis"><span><span>inaktiv</span></span></button>
+            </footer>
+          </article>
+        </div>
+      </section>
+
+      <section class="group" data-od-id="log" aria-label="Protokoll der Ausführungen">
+        <h2>Protokoll</h2>
+        <ol class="log">
+          <li><time>07:38</time><span>Heizung aus<small>Fenster Küche</small></span></li>
+          <li><time>06:02</time><span>Rollladen 100 %<small>ab 22:00</small></span></li>
+        </ol>
+      </section>
+    </div>
+
+    <div class="addbar" data-od-id="add-bar">
+      <button class="btn-primary btn-block" data-open-rule
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/plus" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"
+        /></svg>Neue Automation</button>
+    </div>
+  </main>
+
+  <dialog id="new-rule" data-od-id="new-rule-dialog" aria-labelledby="new-rule-title">
+    <form class="dlg" method="dialog">
+      <h2 id="new-rule-title">Neue Automation</h2>
+      <label>Wenn
+        <select name="when">
+          <option>Fenster offen</option>
+          <option>Temperatur unter 18 °C</option>
+          <option>CO₂ über 1.000 ppm</option>
+          <option>ab 22:00</option>
+        </select>
+      </label>
+      <label>Dann
+        <select name="then">
+          <option>Heizung aus</option>
+          <option>Licht an</option>
+          <option>Rollladen schließen</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" name="notify">Mit Meldung</label>
+      <div class="acts">
+        <button type="button" class="btn-secondary" data-close>Abbrechen</button>
+        <button type="submit" class="btn-primary">Regel anlegen</button>
+      </div>
+    </form>
+  </dialog>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

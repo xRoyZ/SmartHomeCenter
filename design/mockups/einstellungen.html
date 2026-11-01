@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/settings">
+<title>Einstellungen — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-07, AC-12, AC-13, AC-15, AC-16, AC-17, AC-21 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span>07:42</span></div>
+  </header>
+
+  <main>
+    <div class="view">
+      <div class="pagehead">
+        <h1>Einstellungen</h1>
+        <p>Die Welt, in der das Haus läuft: jede Änderung gilt sofort in der Simulation.</p>
+      </div>
+
+      <section class="group" data-od-id="world" aria-label="Simulierte Welt">
+        <h2>Welt</h2>
+        <div class="sgroup">
+          <span class="label" id="l-weather">Wetter</span>
+          <div class="seg" data-name="weather" role="group" aria-labelledby="l-weather">
+            <button aria-pressed="false">Sonnig</button>
+            <button aria-pressed="true">Bewölkt</button>
+            <button aria-pressed="false">Regen</button>
+            <button aria-pressed="false">Gewitter</button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <span class="label" id="l-season">Jahreszeit</span>
+          <div class="seg" data-name="season" role="group" aria-labelledby="l-season">
+            <button aria-pressed="false">Frühling</button>
+            <button aria-pressed="false">Sommer</button>
+            <button aria-pressed="false">Herbst</button>
+            <button aria-pressed="true">Winter</button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <span class="label" id="l-occ">Bewohner</span>
+          <div class="seg" data-name="occupancy" role="group" aria-labelledby="l-occ">
+            <button aria-pressed="true">Alltag</button>
+            <button aria-pressed="false">Jemand zu Hause</button>
+            <button aria-pressed="false">Abwesend</button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <span class="label" id="l-speed">Geschwindigkeit</span>
+          <div class="seg" data-name="speed" role="group" aria-labelledby="l-speed">
+            <button aria-pressed="false">1×</button>
+            <button aria-pressed="false">10×</button>
+            <button aria-pressed="true">60×</button>
+            <button aria-pressed="false">300×</button>
+          </div>
+        </div>
+        <div class="sgroup">
+          <label class="label" for="seed">Seed</label>
+          <div class="seedrow">
+            <input class="field" id="seed" type="text" inputmode="numeric" value="4711" aria-describedby="seed-error">
+            <button class="btn-primary" id="seed-apply">Seed übernehmen</button>
+          </div>
+          <p class="errtext" id="seed-error" role="alert" hidden
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/circle-alert" aria-hidden="true"
+              ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                ><circle cx="12" cy="12" r="10"
+                /><path d="M12 8v4m0 4h.01"
+              /></g
+            ></svg>Der Seed muss eine ganze Zahl sein, zum Beispiel 4711.</p>
+        </div>
+      </section>
+
+      <section class="group" data-od-id="events" aria-label="Ereignisse auslösen">
+        <h2>Ereignisse auslösen</h2>
+        <div class="events">
+          <button class="ev" data-event="forgotten_window"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/door-open" aria-hidden="true"
+              ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                ><path d="M10 21H2m8-18H7a2 2 0 0 0-2 2v16m9-9h.01"
+                /><path d="M19 21V5a2 2 0 0 0-1.675-1.974l-6.163-1.013A1 1 0 0 0 10 3v18a1 1 0 0 0 1.124.992zm3 0h-3"
+              /></g
+            ></svg>Vergessenes Fenster</button>
+          <button class="ev" data-event="water_damage"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/droplets" aria-hidden="true"
+              ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                ><path d="M7 16.3c2.2 0 4-1.83 4-4.05c0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05"
+                /><path d="M12.56 6.6A11 11 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"
+              /></g
+            ></svg>Wasserschaden</button>
+          <button class="ev" data-event="power_spike"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/zap" aria-hidden="true"
+              ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.914 4a1.5 1.5 0 0 0-2.474-1.561l-9 9A1.5 1.5 0 0 0 5.5 14h4.002a.5.5 0 0 1 .471.666L8.086 20a1.5 1.5 0 0 0 2.475 1.56l9-9A1.5 1.5 0 0 0 18.5 10h-3.997a.5.5 0 0 1-.472-.667z"
+            /></svg>Stromspitze</button>
+          <button class="ev" data-event="smoke_alarm"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/flame" aria-hidden="true"
+              ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0a5 5 0 0 1 1-3a1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"
+            /></svg>Rauchalarm</button>
+          <button class="ev" data-event="occupant_rush"
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/users" aria-hidden="true"
+              ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                ><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M16 3.128a4 4 0 0 1 0 7.744M22 21v-2a4 4 0 0 0-3-3.87"
+                /><circle cx="9" cy="7" r="4"
+              /></g
+            ></svg>Bewohner-Andrang</button>
+        </div>
+      </section>
+
+      <nav class="jump" aria-label="Weitere Seiten" data-od-id="jump" style="margin-top:0">
+        <a href="schwellwerte.html">Schwellwerte <span>Grenzen der Meldungen</span></a>
+      </nav>
+
+      <section class="reset-zone" data-od-id="reset" aria-label="Zurücksetzen">
+        <h2 class="h2">Zurücksetzen</h2>
+        <p>Stellt Haus, Geräte, simulierte Uhrzeit, Meldungen und Verlauf auf den Anfang zurück.</p>
+        <label class="check"><input type="checkbox" id="reset-auto">Auch Automationen zurücksetzen</label>
+        <label class="check"><input type="checkbox" id="reset-thr">Auch Schwellwerte zurücksetzen</label>
+        <button class="btn-secondary" data-reset
+          ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/rotate-ccw" aria-hidden="true"
+            ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              ><path d="M3 12a9 9 0 1 0 9-9a9.75 9.75 0 0 0-6.74 2.74L3 8"
+              /><path d="M3 3v5h5"
+            /></g
+          ></svg>Zurücksetzen</button>
+      </section>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/messages">
+<title>Meldungen — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-07, AC-08, AC-15, AC-17 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span>07:42</span></div>
+  </header>
+
+  <main>
+    <div class="view">
+      <div class="pagehead">
+        <h1>Meldungen</h1>
+        <p>Was das Haus gemeldet hat — offen, bis jemand es bestätigt, danach weiter lesbar.</p>
+      </div>
+
+      <section class="mgroup group-open" data-od-id="messages-open" aria-label="Offene Meldungen">
+        <header><span>Offen</span><b id="count-open">2</b></header>
+        <ul id="list-open">
+          <li class="mrow">
+            <span class="sev hi">hoch</span>
+            <span class="room-n">Bad</span>
+            <time>07:31</time>
+            <span class="val">Hohe Luftfeuchte 78 %</span>
+            <button class="btn-secondary btn-sm act" data-ack>Bestätigen</button>
+          </li>
+          <li class="mrow">
+            <span class="sev mid">mittel</span>
+            <span class="room-n">Küche</span>
+            <time>07:05</time>
+            <span class="val">CO₂ 1.240 ppm</span>
+            <button class="btn-secondary btn-sm act" data-ack>Bestätigen</button>
+          </li>
+        </ul>
+        <p class="empty">Alles bestätigt — das Haus hat gerade nichts zu melden.</p>
+      </section>
+
+      <section class="mgroup group-done" data-od-id="messages-done" aria-label="Bestätigte Meldungen">
+        <header><span>Bestätigt</span><b id="count-done">1</b></header>
+        <ul id="list-done">
+          <li class="mrow">
+            <span class="sev mid">mittel</span>
+            <span class="room-n">Wohnzimmer</span>
+            <time>06:12</time>
+            <span class="val">Raum zu kalt 17,8 °C</span>
+            <span class="act">bestätigt 06:40</span>
+          </li>
+        </ul>
+        <p class="empty">Noch nichts bestätigt.</p>
+      </section>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

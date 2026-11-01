@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/history">
+<title>Verlauf — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-03, AC-10, AC-15, AC-17, AC-25 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span>07:42</span></div>
+  </header>
+
+  <main>
+    <div class="view">
+      <div class="pagehead">
+        <h1>Verlauf</h1>
+        <p>Wie sich das Haus entwickelt hat — aus der laufend mitgeschriebenen Zeitreihe der Simulation.</p>
+      </div>
+
+      <div class="filters" role="toolbar" aria-label="Zeitfenster und Messgröße" data-od-id="filters">
+        <button class="fbtn" data-win="15m" aria-pressed="false">15 Minuten</button>
+        <button class="fbtn" data-win="1h" aria-pressed="true">1 Stunde</button>
+        <button class="fbtn" data-win="1d" aria-pressed="false">1 Tag</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button class="fbtn" data-metric="temperature" aria-pressed="true">Temperatur</button>
+        <button class="fbtn" data-metric="humidity" aria-pressed="false">Luftfeuchte</button>
+        <button class="fbtn" data-metric="co2" aria-pressed="false">CO₂</button>
+        <button class="fbtn" data-metric="power" aria-pressed="false">Verbrauch</button>
+      </div>
+
+      <section class="group chartwrap" data-od-id="series" aria-label="Laufende Messreihe">
+        <p class="seriesname" id="series-name"><b>Wohnzimmer</b> · Temperatur · letzte Stunde · Simulation</p>
+        <div class="axis"><span>Max <b id="y-max">21,4 °C</b></span><span>Jetzt <b id="now-val">21,4 °C</b></span><span>Min <b id="y-min">20,3 °C</b></span></div>
+        <svg class="chart tall" id="hist" viewBox="0 0 400 200" preserveAspectRatio="none" role="img" aria-label="Temperaturverlauf Wohnzimmer, letzte Stunde">
+          <line class="grid" x1="0" y1="20" x2="400" y2="20"/>
+          <line class="grid" x1="0" y1="70" x2="400" y2="70"/>
+          <line class="grid" x1="0" y1="120" x2="400" y2="120"/>
+          <line class="grid" x1="0" y1="170" x2="400" y2="170"/>
+          <path class="area" id="hist-area" d="M0 90 L40 96 L80 118 L120 148 L160 170 L200 160 L240 130 L280 100 L320 70 L360 48 L400 30 L400 200 L0 200 Z"/>
+          <path class="ln" id="hist-line" d="M0 90 L40 96 L80 118 L120 148 L160 170 L200 160 L240 130 L280 100 L320 70 L360 48 L400 30"/>
+        </svg>
+        <div class="axis" id="x-axis"><span>06:42</span><span>07:12</span><span>07:42</span></div>
+      </section>
+
+      <section class="export" data-od-id="export" aria-label="CSV-Export">
+        <label class="check"><input type="checkbox" id="all4">Alle vier Messgrößen exportieren</label>
+        <button class="btn-primary" data-download
+          ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/download" aria-hidden="true"
+            ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              ><path d="M12 15V3m9 12v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"
+              /><path d="m7 10l5 5l5-5"
+            /></g
+          ></svg>CSV herunterladen</button>
+        <span class="fname" id="fname">wohnzimmer_temperatur_1h.csv</span>
+      </section>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

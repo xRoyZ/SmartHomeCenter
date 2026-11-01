@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/devices/:deviceId">
+<title>Heizung Wohnzimmer — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-03, AC-04, AC-17 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span>07:42</span></div>
+  </header>
+
+  <main>
+    <div class="view">
+      <section class="devblock" data-od-id="device-state" aria-label="Zustand des Geräts">
+        <span class="label">Heizung Wohnzimmer</span>
+        <div><span class="state-word">HEIZT</span></div>
+        <div class="bigfig" id="soll-fig"><span class="n">22,0</span><span class="u">°C Soll</span></div>
+        <div class="minis">
+          <div><b>21,4 °C</b><small>Ist</small></div>
+          <div><b>64 %</b><small>Leistung</small></div>
+          <div><b>340 W</b><small>Verbrauch</small></div>
+        </div>
+        <p class="delta" data-od-id="last-action"
+          ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/trending-up" aria-hidden="true"
+            ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              ><path d="M16 7h6v6"
+              /><path d="m22 7l-8.5 8.5l-5-5L2 17"
+            /></g
+          ></svg
+          ><span
+            ><time>07:38</time> Soll von 20,0 auf 22,0 °C — Raumtemperatur +0,6 °C in 22 min</span
+        ></p>
+      </section>
+
+      <a class="crumb" href="raum.html"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/arrow-left" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"
+        /></svg>Wohnzimmer</a>
+
+      <div class="split">
+        <section class="group" data-od-id="setpoint" aria-label="Solltemperatur einstellen">
+          <h2>Soll einstellen</h2>
+          <div class="stepper" data-stepper data-step="0.5" data-min="5" data-max="28" data-dec="1" data-unit="°C" data-value="22" data-set="soll-fig">
+            <button class="btn-secondary btn-square" data-dir="-1" aria-label="Solltemperatur senken"
+              ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/minus" aria-hidden="true"
+                ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14"
+              /></svg
+            ></button>
+            <span class="val">22,0<small>°C</small></span>
+            <button class="btn-secondary btn-square" data-dir="1" aria-label="Solltemperatur erhöhen"
+              ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/plus" aria-hidden="true"
+                ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"
+              /></svg
+            ></button>
+          </div>
+          <ul class="ledger">
+            <li><span class="k">Soll</span><span class="v">22,0<small>°C</small></span></li>
+            <li><span class="k">Ist</span><span class="v">21,4<small>°C</small></span></li>
+            <li><span class="k">Leistung</span><span class="v">64<small>%</small></span></li>
+          </ul>
+        </section>
+
+        <section class="group chartwrap" data-od-id="device-chart" aria-label="Messwertverlauf der letzten 60 Minuten">
+          <h2>Messwertverlauf · letzte 60 Minuten</h2>
+          <svg class="chart" data-hover data-unit="°C" data-y0="82" data-v0="20.8" data-y1="46" data-v1="21.4" viewBox="0 0 400 140" preserveAspectRatio="none" role="img" aria-label="Raumtemperatur steigt in 60 Minuten von 20,8 auf 21,4 °C, Solllinie bei 22,0 °C">
+            <line class="grid" x1="0" y1="10" x2="400" y2="10"/>
+            <line class="grid" x1="0" y1="70" x2="400" y2="70"/>
+            <line class="grid" x1="0" y1="130" x2="400" y2="130"/>
+            <path class="area" d="M0 82 L50 84 L100 80 L150 76 L200 70 L250 66 L300 58 L350 52 L400 46 L400 140 L0 140 Z"/>
+            <path class="ln" d="M0 82 L50 84 L100 80 L150 76 L200 70 L250 66 L300 58 L350 52 L400 46"/>
+            <path class="set" d="M0 130 L372 130 L372 10 L400 10"/>
+            <line class="mark" x1="372" y1="0" x2="372" y2="140"/>
+          </svg>
+          <div class="axis"><span>06:42</span><span>07:12</span><span>07:42</span></div>
+          <div class="legend"><span><i></i>Raumtemperatur Ist</span><span><i class="dash"></i>Solllinie gestrichelt</span></div>
+        </section>
+      </div>
+
+      <a class="btn-primary" href="verlauf.html" data-od-id="open-history">Heizung im Verlauf ansehen<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/arrow-right" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7l-7 7"
+        /></svg
+      ></a>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>

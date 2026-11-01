@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1c2a38">
+<meta name="screen-route" content="/">
+<title>Hausübersicht — SmartHomeCenter (simuliert)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- serves: AC-01, AC-02, AC-11, AC-13, AC-15, AC-16, AC-17, AC-23, AC-24 -->
+<div class="app">
+
+  <header class="simbar" data-od-id="sim-bar">
+    <span class="tag">Simuliert</span>
+    <span class="seed">Seed 4711</span>
+    <div class="clock" aria-label="Simulierte Uhrzeit Dienstag 07:42"><span class="day">Di</span><span data-clock>07:42</span></div>
+  </header>
+
+  <main>
+    <section class="sky" data-od-id="sim-controls" aria-label="Simulation steuern">
+      <div class="speed" role="group" aria-label="Geschwindigkeit">
+        <button class="chipbtn" data-speed="1" aria-pressed="false">1×</button>
+        <button class="chipbtn" data-speed="10" aria-pressed="false">10×</button>
+        <button class="chipbtn" data-speed="60" aria-pressed="true">60×</button>
+        <button class="chipbtn" data-speed="300" aria-pressed="false">300×</button>
+        <button class="btn-primary btn-sm" data-pause aria-pressed="false"
+          ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/pause" aria-hidden="true"
+            ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              ><rect width="5" height="18" x="14" y="3" rx="1"
+              /><rect width="5" height="18" x="5" y="3" rx="1"
+            /></g
+          ></svg
+          ><span class="lbl">Pause</span
+        ></button>
+      </div>
+      <div class="weather" data-od-id="weather">
+        <span class="w"
+          ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/cloud" aria-hidden="true"
+            ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9"
+          /></svg>Bewölkt</span>
+        <span class="season">Winter</span>
+        <span class="t">Außen 6,4 °C</span>
+        <span></span>
+        <div class="sun"
+          ><span
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/sunrise" aria-hidden="true"
+              ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v8m-7.07.93l1.41 1.41M2 18h2m16 0h2m-2.93-7.07l-1.41 1.41M22 22H2M8 6l4-4l4 4m0 12a4 4 0 0 0-8 0"
+            /></svg>Sonnenaufgang 07:12</span
+          ><span
+            ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/sunset" aria-hidden="true"
+              ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10V2m-7.07 8.93l1.41 1.41M2 18h2m16 0h2m-2.93-7.07l-1.41 1.41M22 22H2M16 6l-4 4l-4-4m8 12a4 4 0 0 0-8 0"
+            /></svg>Sonnenuntergang 17:38</span
+        ></div>
+      </div>
+    </section>
+
+    <div class="house">
+      <section class="energy" data-od-id="energy" aria-label="Energie des Hauses">
+        <div class="label">Netzbezug</div>
+        <div class="figure"><span class="n" data-net>2,84</span><span class="u">kW</span></div>
+        <div class="side">
+          <span>Solar<b data-solar>0,42 kW</b></span>
+          <span>Haus<b data-haus>3,26 kW</b></span>
+        </div>
+        <div class="bar" role="img" aria-label="Netzbezug und Solar im Verhältnis zu 3,5 kW"
+          ><i class="grid" data-bar-grid style="width:100%;transform:scaleX(.811)"
+          ></i
+          ><i class="solar" data-bar-solar style="width:100%;transform:scaleX(.12);margin-left:-100%;margin-left:0"
+          ></i
+        ></div>
+      </section>
+
+      <section class="rooms" data-od-id="rooms" aria-label="Sechs Räume">
+        <div class="rooms-head"><span class="label">Räume · 6</span><span class="label">Live · simuliert</span></div>
+
+        <a class="room raised" href="raum.html" data-od-id="room-wohnzimmer">
+          <span class="name">Wohnzimmer</span>
+          <span class="temp"><span data-wz-temp>21,4</span><small>°C</small><span class="watt">340 W</span></span>
+          <span class="chips">
+            <span class="chip on"
+              ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/square-dashed" aria-hidden="true"
+                ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3a2 2 0 0 0-2 2m16-2a2 2 0 0 1 2 2m0 14a2 2 0 0 1-2 2M5 21a2 2 0 0 1-2-2M9 3h1M9 21h1m4-18h1m-1 18h1M3 9v1m18-1v1M3 14v1m18-1v1"
+              /></svg>Fenster auf</span>
+            <span class="chip heat-on" data-wz-heat-chip>Heizt 64 %</span>
+            <span class="chip on">Licht 70 %</span>
+          </span>
+          <svg class="spark" viewBox="0 0 300 32" preserveAspectRatio="none" role="img" aria-label="Temperaturverlauf der letzten Stunde, steigend">
+            <path class="fill" d="M0 26 L12 24 L24 25 L36 22 L48 20 L60 21 L72 17 L84 18 L96 15 L108 16 L120 13 L132 14 L144 11 L156 13 L168 10 L180 12 L192 9 L204 11 L216 8 L228 10 L240 7 L252 9 L264 6 L276 8 L288 5 L300 6 L300 32 L0 32 Z"/>
+            <path class="ln" d="M0 26 L12 24 L24 25 L36 22 L48 20 L60 21 L72 17 L84 18 L96 15 L108 16 L120 13 L132 14 L144 11 L156 13 L168 10 L180 12 L192 9 L204 11 L216 8 L228 10 L240 7 L252 9 L264 6 L276 8 L288 5 L300 6"/>
+          </svg>
+          <span class="heat"><i data-wz-heat style="width:100%;transform:scaleX(.64)"></i></span>
+        </a>
+
+        <a class="room" href="raum.html" data-od-id="room-kueche">
+          <span class="name">Küche</span>
+          <span class="temp">22,8<small>°C</small><span class="watt">1.120 W</span></span>
+          <span class="chips">
+            <span class="chip">Fenster zu</span>
+            <span class="chip on">Licht an</span>
+            <span class="chip">Heizung aus</span>
+            <span class="chip alert"
+              ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/triangle-alert" aria-hidden="true"
+                ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"
+              /></svg>CO₂</span>
+          </span>
+          <span class="heat"><i style="width:100%;transform:scaleX(0)"></i></span>
+        </a>
+
+        <a class="room" href="raum.html" data-od-id="room-schlafzimmer">
+          <span class="name">Schlafzimmer</span>
+          <span class="temp">18,1<small>°C</small><span class="watt">210 W</span></span>
+          <span class="chips">
+            <span class="chip on">Fenster auf</span>
+            <span class="chip heat-on">Heizt 38 %</span>
+            <span class="chip">Licht aus</span>
+          </span>
+          <span class="heat"><i style="width:100%;transform:scaleX(.38)"></i></span>
+        </a>
+
+        <a class="room" href="raum.html" data-od-id="room-kinderzimmer">
+          <span class="name">Kinderzimmer</span>
+          <span class="temp">19,6<small>°C</small><span class="watt">95 W</span></span>
+          <span class="chips">
+            <span class="chip">Fenster zu</span>
+            <span class="chip on">Licht an</span>
+            <span class="chip heat-on">Heizt 22 %</span>
+          </span>
+          <span class="heat"><i style="width:100%;transform:scaleX(.22)"></i></span>
+        </a>
+
+        <a class="room" href="raum.html" data-od-id="room-bad">
+          <span class="name">Bad</span>
+          <span class="temp">23,2<small>°C</small><span class="watt">460 W</span></span>
+          <span class="chips">
+            <span class="chip on">Licht an</span>
+            <span class="chip heat-on">Heizt 18 %</span>
+            <span class="chip alert"
+              ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/triangle-alert" aria-hidden="true"
+                ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"
+              /></svg>Feuchte 78 %</span>
+          </span>
+          <span class="heat"><i style="width:100%;transform:scaleX(.18)"></i></span>
+        </a>
+
+        <a class="room" href="raum.html" data-od-id="room-flur">
+          <span class="name">Flur</span>
+          <span class="temp">19,0<small>°C</small><span class="watt">40 W</span></span>
+          <span class="chips">
+            <span class="chip">Fenster zu</span>
+            <span class="chip on">Licht an</span>
+            <span class="chip">Heizung aus</span>
+          </span>
+          <span class="heat"><i style="width:100%;transform:scaleX(0)"></i></span>
+        </a>
+      </section>
+
+      <div class="side">
+        <nav class="jump" aria-label="Weitere Seiten" data-od-id="jump">
+          <a href="geraet.html">Heizung Wohnzimmer <span>Gerätedetail</span></a>
+          <a href="schwellwerte.html">Schwellwerte <span>Grenzen der Meldungen</span></a>
+          <a href="einstellungen.html">Einstellungen <span>Wetter, Seed, Ereignisse</span></a>
+        </nav>
+
+        <a class="strip" href="meldungen.html" data-od-id="open-messages" aria-label="Meldungen, 2 offen">
+          <div class="head"
+            ><span class="label">Meldungen · 2 offen</span
+            ><span class="go">Ansehen<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/arrow-right" aria-hidden="true"
+                ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7l7 7l-7 7"
+              /></svg
+            ></span
+          ></div>
+          <div class="msg"><span class="sev hi">hoch</span><span>Bad: Hohe Luftfeuchte 78 %</span><time>07:31</time></div>
+          <div class="msg"><span class="sev mid">mittel</span><span>Küche: CO₂ 1.240 ppm</span><time>07:05</time></div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <nav class="tabs" aria-label="Hauptnavigation" data-od-id="tabbar">
+    <a class="tab" href="index.html" aria-current="page"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/house" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+            /><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+          /></g
+        ></svg
+      ></span>Haus</a>
+    <a class="tab" href="verlauf.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/chart-line" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><path d="M3 3v16a2 2 0 0 0 2 2h16"
+            /><path d="m19 9l-5 5l-4-4l-3 3"
+          /></g
+        ></svg
+      ></span>Verlauf</a>
+    <a class="tab" href="meldungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/bell" aria-hidden="true"
+          ><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.268 21a2 2 0 0 0 3.464 0m-10.47-5.674A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"
+        /></svg
+        ><span class="count">2</span
+      ></span>Meldungen</a>
+    <a class="tab" href="automationen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/workflow" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><rect width="8" height="8" x="3" y="3" rx="2"
+            /><path d="M7 11v4a2 2 0 0 0 2 2h4"
+            /><rect width="8" height="8" x="13" y="13" rx="2"
+          /></g
+        ></svg
+      ></span>Regeln</a>
+    <a class="tab" href="einstellungen.html"
+      ><span class="ico"
+        ><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="icon" data-icon="lucide/ellipsis" aria-hidden="true"
+          ><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            ><circle cx="12" cy="12" r="1"
+            /><circle cx="19" cy="12" r="1"
+            /><circle cx="5" cy="12" r="1"
+          /></g
+        ></svg
+      ></span>Mehr</a>
+  </nav>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
