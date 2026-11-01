@@ -31,7 +31,7 @@
       "env": {
         "SMARTHOME_DB_PATH": { "dev": "smarthome.db" },
         "SMARTHOME_TICK_SECONDS": { "dev": "1.0" },
-        "SMARTHOME_CORS_ORIGINS": { "dev": "http://localhost:5173" }
+        "SMARTHOME_CORS_ORIGINS": { "dev": "${service:web.origin}" }
       },
       "seed": [["${python}", "-m", "app.seed"]],
       "test": [["${python}", "-m", "pytest", "-q"]],
@@ -39,6 +39,20 @@
         ["${python}", "-m", "ruff", "format", "--check", "."],
         ["${python}", "-m", "ruff", "check", "."]
       ]
+    },
+    {
+      "name": "web",
+      "dir": "frontend",
+      "stack": "web-vite",
+      "kind": "static",
+      "install": [["npm", "ci"]],
+      "build": [["npm", "run", "build"]],
+      "serve_dir": "dist",
+      "env": {
+        "VITE_API_BASE": { "dev": "${service:api.origin}" }
+      },
+      "test": [["npm", "test"]],
+      "lint": [["npm", "run", "typecheck"]]
     }
   ]
 }

@@ -1,0 +1,62 @@
+/* Design tokens of the approved mockup set (design/mockups/styles.css).
+   Colours are kept in oklch exactly as the design hands them over; components
+   only ever reference these custom properties. */
+
+:root {
+  --ground: oklch(0.92 0.008 170);
+  --ground-deep: oklch(0.87 0.01 190);
+  --surface: oklch(0.975 0.004 170);
+  --ink: oklch(0.21 0.018 220);
+  --muted: oklch(0.52 0.012 220);
+  --muted-text: oklch(0.45 0.014 220);
+  --line: oklch(0.84 0.008 200);
+  --line-strong: oklch(0.72 0.01 210);
+  --accent: oklch(0.52 0.17 255);
+  --accent-hover: oklch(0.44 0.17 255);
+  --accent-text: oklch(0.46 0.17 255);
+  --accent-tint: oklch(0.52 0.17 255 / 0.12);
+  --on-accent: oklch(0.99 0 0);
+  --deep: oklch(0.24 0.03 235);
+  --deep-2: oklch(0.31 0.03 235);
+  --deep-line: oklch(0.36 0.025 232);
+  --on-deep: oklch(0.95 0.006 200);
+  --on-deep-muted: oklch(0.78 0.02 220);
+  --accent-on-deep: oklch(0.8 0.1 255);
+  --danger: oklch(0.48 0.17 25);
+  --page: oklch(0.86 0.008 200);
+
+  --disp: "Sofia Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --text: "Atkinson Hyperlegible Next", Verdana, "Segoe UI", system-ui, sans-serif;
+
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-15: 15px;
+  --fs-17: 17px;
+  --fs-22: 22px;
+  --fs-32: 32px;
+  --fs-56: 56px;
+  --w-text: 400;
+  --w-disp: 700;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 24px;
+  --s5: 32px;
+  --pad: 16px;
+  --col: 390px;
+  --measure: 60ch;
+  --tabs-h: 56px;
+  --hit: 44px;
+
+  --r-sm: 2px;
+  --r-md: 4px;
+  --r-pill: 999px;
+  --shadow-float: 0 8px 24px oklch(0.21 0.018 220 / 0.25);
+
+  --d-fast: 120ms;
+  --d-data: 200ms;
+  --d-flash: 900ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --flash-from: var(--accent-text);
+}
