@@ -6,7 +6,7 @@
  * rejected command keeps the page live and shows the server's German message.
  */
 
-import { useEffect, useMemo, useState, type ReactElement } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { DeviceControlList } from "../features/room/DeviceControlList";
@@ -39,6 +39,10 @@ const GENERIC_ERROR = "Ein interner Fehler ist aufgetreten.";
 const CHART_METRIC = "temperature";
 const CHART_WINDOW = "1h";
 const REFRESH_MS = 5000;
+// The schedule-driven simulation can override a commanded device on the next
+// tick (for example a light during the day). Keep the value the user just set
+// visible for this long before the live snapshot takes over again.
+const COMMAND_HOLD_MS = 1500;
 
 function messageFor(error: unknown): string {
   if (error instanceof ApiError) {
@@ -108,6 +112,7 @@ export function RoomDetail(): ReactElement {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [pending, setPending] = useState<Record<string, DeviceCommand>>({});
+  const pendingSince = useRef<Record<string, number>>({});
   const [series, setSeries] = useState<HistorySeries | null>(null);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
@@ -178,12 +183,13 @@ export function RoomDetail(): ReactElement {
     };
   }, [roomId]);
 
-  // The optimistic value stays until a snapshot confirms the command, so a
-  // broadcast from another client can never snap a control back mid-command.
+  // A commanded value stays visible for a short window so the user sees the
+  // control take effect; afterwards the live snapshot owns the shown state.
   useEffect(() => {
     if (!state) {
       return;
     }
+    const now = Date.now();
     setPending((current) => {
       if (Object.keys(current).length === 0) {
         return current;
@@ -196,14 +202,12 @@ export function RoomDetail(): ReactElement {
           if (!command) {
             continue;
           }
-          const confirmed =
-            (command.is_on === undefined || command.is_on === device.is_on) &&
-            (command.level === undefined || command.level === device.level) &&
-            (command.target_temp === undefined || command.target_temp === device.target_temp);
-          if (confirmed) {
-            delete next[device.id];
-            removed = true;
+          if (now - (pendingSince.current[device.id] ?? 0) < COMMAND_HOLD_MS) {
+            continue;
           }
+          delete next[device.id];
+          delete pendingSince.current[device.id];
+          removed = true;
         }
       }
       return removed ? next : current;
@@ -222,10 +226,12 @@ export function RoomDetail(): ReactElement {
 
   async function handleCommand(device: DeviceState, command: DeviceCommand): Promise<void> {
     setActionError(null);
+    pendingSince.current[device.id] = Date.now();
     setPending((current) => ({ ...current, [device.id]: command }));
     try {
       await setDeviceState(device.id, command);
     } catch (error) {
+      delete pendingSince.current[device.id];
       setPending((current) => {
         const next = { ...current };
         delete next[device.id];
