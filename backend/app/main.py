@@ -34,7 +34,7 @@ from .api import (
 from .config import get_settings
 from .db import get_session_factory, init_db
 from .schemas import ApiError, HouseState, error_body
-from .simulation import house
+from .simulation import house, persistence
 from .simulation.engine import SimulationEngine
 from .ws import handle_connection, manager
 
@@ -133,7 +133,15 @@ async def lifespan(application: FastAPI) -> AsyncIterator[None]:
     async def publish(snapshot: HouseState) -> None:
         await manager.broadcast(snapshot)
 
-    application.state.engine = SimulationEngine(get_session_factory(), publish)
+    engine = SimulationEngine(get_session_factory(), publish)
+    session = get_session_factory()()
+    try:
+        restored = persistence.load(session)
+    finally:
+        session.close()
+    if restored is not None:
+        engine.state, engine.settings = restored
+    application.state.engine = engine
     application.state.settings = configuration
     try:
         yield
