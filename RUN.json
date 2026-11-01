@@ -1,0 +1,44 @@
+{
+  "runcontract": 1,
+  "services": [
+    {
+      "name": "api",
+      "dir": "backend",
+      "stack": "python",
+      "kind": "server",
+      "install": [
+        ["${python}", "-m", "pip", "install", "-q", "-r", "requirements.txt"]
+      ],
+      "start": [
+        "${python}",
+        "-m",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "${PORT}",
+        "--no-access-log",
+        "--log-level",
+        "warning"
+      ],
+      "port": 8000,
+      "port_env": "PORT",
+      "health": {
+        "path": "/api/health",
+        "expect_status": [200]
+      },
+      "env": {
+        "SMARTHOME_DB_PATH": { "dev": "smarthome.db" },
+        "SMARTHOME_TICK_SECONDS": { "dev": "1.0" },
+        "SMARTHOME_CORS_ORIGINS": { "dev": "http://localhost:5173" }
+      },
+      "seed": [["${python}", "-m", "app.seed"]],
+      "test": [["${python}", "-m", "pytest", "-q"]],
+      "lint": [
+        ["${python}", "-m", "ruff", "format", "--check", "."],
+        ["${python}", "-m", "ruff", "check", "."]
+      ]
+    }
+  ]
+}
