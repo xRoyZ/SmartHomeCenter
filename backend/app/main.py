@@ -31,7 +31,7 @@ from .api import (
     state,
     thresholds,
 )
-from .config import get_settings
+from .config import DEFAULT_CORS_ORIGINS, get_settings
 from .db import get_session_factory, init_db
 from .schemas import ApiError, HouseState, error_body
 from .simulation import house, persistence
@@ -169,10 +169,14 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # The access-log middleware answers unexpected exceptions itself, so CORS
+    # must wrap it; otherwise a browser sees a CORS failure instead of the error.
+    # The documented local frontend origin stays allowed beside configured ones.
     application.middleware("http")(_access_log_middleware)
+    allowed_origins = list(dict.fromkeys((*configuration.cors_origins, *DEFAULT_CORS_ORIGINS)))
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=list(configuration.cors_origins),
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
