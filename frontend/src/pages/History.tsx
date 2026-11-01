@@ -16,6 +16,7 @@ import { HistoryChart } from "../features/history/HistoryChart";
 import { HistoryControls, type HistorySelection } from "../features/history/HistoryControls";
 
 const GENERIC_ERROR = "Der Verlauf konnte nicht geladen werden.";
+const REFRESH_MS = 5000;
 
 const METRIC_FILE_NAMES: Record<HistoryMetric, string> = {
   temperature: "temperatur",
@@ -110,39 +111,51 @@ export function History(): ReactElement {
   useEffect(() => {
     if (!selection.roomId) {
       setLoaded(null);
-      return;
+      return undefined;
     }
     let active = true;
-    setLoading(true);
-    setError(null);
 
-    getHistory({
-      room_id: selection.roomId,
-      metric: selection.metric,
-      window: selection.window,
-    })
-      .then((series) => {
-        if (active) {
-          setLoaded({ key: queryKey, series });
-        }
+    const load = (initial: boolean) => {
+      if (initial) {
+        setLoading(true);
+      }
+      setError(null);
+
+      getHistory({
+        room_id: selection.roomId,
+        metric: selection.metric,
+        window: selection.window,
       })
-      .catch((cause: unknown) => {
-        if (!active) {
-          return;
-        }
-        setLoaded(null);
-        setError(cause instanceof ApiError ? cause.message : GENERIC_ERROR);
-      })
-      .finally(() => {
-        if (active) {
-          setLoading(false);
-        }
-      });
+        .then((series) => {
+          if (active) {
+            setLoaded({ key: queryKey, series });
+          }
+        })
+        .catch((cause: unknown) => {
+          if (!active) {
+            return;
+          }
+          setLoaded(null);
+          setError(cause instanceof ApiError ? cause.message : GENERIC_ERROR);
+        })
+        .finally(() => {
+          if (active) {
+            setLoading(false);
+          }
+        });
+    };
+
+    // The simulated clock advances up to 300 times per real second. Refetching
+    // on every tick would cancel each request before it settles, so the series
+    // is refreshed on a real-time cadence instead of on the clock.
+    load(true);
+    const timer = window.setInterval(() => load(false), REFRESH_MS);
 
     return () => {
       active = false;
+      window.clearInterval(timer);
     };
-  }, [queryKey, selection.roomId, selection.metric, selection.window, simTime]);
+  }, [queryKey, selection.roomId, selection.metric, selection.window]);
 
   const series = loaded?.key === queryKey ? loaded.series : null;
   const room = rooms.find((entry) => entry.id === selection.roomId) ?? null;

@@ -239,4 +239,70 @@ describe("room detail", () => {
     expect(container?.textContent).toContain("Luftfeuchte");
     expect(container?.textContent).toContain("21,4");
   });
+
+  it("renders the curve when the series arrives after the simulated clock advanced", async () => {
+    const pending: Array<(value: HistorySeries) => void> = [];
+    mocks.getHistory.mockImplementation(
+      () =>
+        new Promise<HistorySeries>((resolve) => {
+          pending.push(resolve);
+        }),
+    );
+
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const element = (
+      <MemoryRouter initialEntries={["/rooms/living_room"]}>
+        <Routes>
+          <Route path="/rooms/:roomId" element={<RoomDetail />} />
+        </Routes>
+      </MemoryRouter>
+    );
+    await act(async () => {
+      root?.render(element);
+    });
+
+    await vi.waitFor(() => {
+      expect(mocks.getHistory).toHaveBeenCalledTimes(1);
+    });
+
+    mocks.liveState.current = { ...house, sim_time: "2026-06-15T08:06:00" };
+    await act(async () => {
+      root?.render(element);
+    });
+
+    await act(async () => {
+      pending[0]?.(series);
+    });
+
+    await vi.waitFor(() => {
+      expect(container?.querySelector("svg.chart path.ln")).not.toBeNull();
+    });
+  });
+
+  it("shows the loading text and then the German empty state for an empty series", async () => {
+    const pending: Array<(value: HistorySeries) => void> = [];
+    mocks.getHistory.mockImplementation(
+      () =>
+        new Promise<HistorySeries>((resolve) => {
+          pending.push(resolve);
+        }),
+    );
+
+    await renderRoom();
+
+    await vi.waitFor(() => {
+      expect(container?.textContent).toContain("Der Verlauf wird geladen …");
+    });
+
+    await act(async () => {
+      pending[0]?.({ ...series, points: [] });
+    });
+
+    await vi.waitFor(() => {
+      expect(container?.textContent).toContain("Noch keine Messwerte für diesen Raum.");
+    });
+    expect(container?.textContent).not.toContain("Der Verlauf wird geladen …");
+  });
 });
